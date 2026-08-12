@@ -327,23 +327,19 @@ const LanguageGroup = ({ group, searchActive, onSelect }) => {
       </button>
       
       {isExpanded && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {group.songs.map(song => (
-            <div 
+        <ul className="flex flex-col border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+          {group.songs.map((song, index) => (
+            <li 
               key={song.id}
               onClick={() => onSelect(song)}
-              className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 hover:bg-blue-50 hover:border-blue-200 dark:hover:bg-gray-800 dark:hover:border-blue-900 cursor-pointer transition-all duration-200 flex items-center justify-between group shadow-sm hover:shadow"
+              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors text-gray-800 dark:text-gray-200 flex items-center ${
+                index !== group.songs.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''
+              }`}
             >
-              <div className="flex items-center gap-3 overflow-hidden">
-                <Music className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                <span className="font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 truncate">
-                  {song.title}
-                </span>
-              </div>
-              <Play className="w-4 h-4 text-gray-300 dark:text-gray-600 opacity-0 group-hover:opacity-100 group-hover:text-blue-500 transition-all flex-shrink-0" />
-            </div>
+              <span className="font-medium text-[15px]">{song.title}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
