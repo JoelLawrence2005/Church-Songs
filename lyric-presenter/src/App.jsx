@@ -131,7 +131,7 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
 
   const renderLyricLine = (line) => {
     if (!globalShowChords || !line.includes('[')) {
-      return <div className="min-h-[1.5em]" style={{ lineHeight: lineHeight }}>{line.replace(/\[.*?\]/g, '')}</div>;
+      return <div className="min-h-[1.5em]" style={{ lineHeight: lineHeight, color: '#000000', WebkitTextFillColor: '#000000' }}>{line.replace(/\[.*?\]/g, '')}</div>;
     }
 
     const parts = line.split(/\[(.*?)\]/);
@@ -146,10 +146,13 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
 
       segments.push(
         <span key={i} className="inline-flex flex-col justify-end whitespace-pre text-left">
-          <span className="text-blue-600 font-bold text-[0.45em] leading-none mb-2 h-[1em]">
+          <span 
+            className="text-red-600 font-bold text-[0.45em] leading-none mb-2 h-[1em]"
+            style={{ color: '#dc2626', WebkitTextFillColor: '#dc2626' }}
+          >
             {transposedChord || ''}
           </span>
-          <span style={{ lineHeight: lineHeight }}>{lyric || ''}</span>
+          <span style={{ lineHeight: lineHeight, color: '#000000', WebkitTextFillColor: '#000000' }}>{lyric || ''}</span>
         </span>
       );
     }
