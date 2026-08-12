@@ -4,52 +4,55 @@ import {
   Maximize, Minimize, Play, X, Music, Lock, Plus, Edit2, Trash2, Save, LogOut 
 } from 'lucide-react';
 
-const LANGUAGES = ['English', 'Sinhala', 'Tamil'];
-
-const CHROMA_SCALE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-const FLAT_TO_SHARP = { 'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#' };
-
-const transposeChord = (chord, steps) => {
-  if (!chord || steps === 0) return chord;
-  // Matches root notes like C, C#, Bb
-  return chord.replace(/[CDEFGAB][#b]?/g, match => {
-    const note = FLAT_TO_SHARP[match] || match;
-    const index = CHROMA_SCALE.indexOf(note);
-    if (index === -1) return match;
-    let newIndex = (index + steps) % 12;
-    if (newIndex < 0) newIndex += 12; 
-    return CHROMA_SCALE[newIndex];
-  });
-};
-
 const INITIAL_SONGS = [
-  // English
-  { id: 'e1', language: 'English', title: 'Above All Powers', slides: [{ type: 'title', text: 'Above All Powers' }, { type: 'lyric', text: '[G]Above all [C]powers\n[D]Above all [G]kings\n[G]Above all [C]nature\nAnd [D]all created [G]things' }, { type: 'lyric', text: '[G]Above all [C]wisdom\nAnd [D]all the ways of [G]man\nYou were [Em]here\nBefore the world [C]began [D]' }] },
-  { id: 'e2', language: 'English', title: 'Amazing Grace', slides: [{ type: 'title', text: 'Amazing Grace' }, { type: 'lyric', text: '[G]Amazing [G7]grace! How [C]sweet the [G]sound\nThat [G]saved a wretch like [D]me!' }, { type: 'lyric', text: 'I [G]once was [G7]lost, but [C]now am [G]found;\nWas [Em]blind, but [D]now I [G]see.' }] },
-  
-  // Sinhala
-  { id: 's1', language: 'Sinhala', title: 'Yesu Obe Namayata', slides: [{ type: 'title', text: 'Yesu Obe Namayata' }, { type: 'lyric', text: 'Yesu obe namayata\nPrashansa wewa' }, { type: 'lyric', text: 'Mulu hadawathinma\nOba namadimi' }] },
-  { id: 's2', language: 'Sinhala', title: 'Mage Galawumkaraya', slides: [{ type: 'title', text: 'Mage Galawumkaraya' }, { type: 'lyric', text: 'Mage galawumkaraya\nJiwamanawa atha' }] },
-  
-  // Tamil
-  { id: 't1', language: 'Tamil', title: 'En Uyirana Yesu', slides: [{ type: 'title', text: 'En Uyirana Yesu' }, { type: 'lyric', text: 'En uyirana Yesu\nEn aaruyire' }, { type: 'lyric', text: 'Neer illamal\nNaan vazhavillai' }] },
-  { id: 't2', language: 'Tamil', title: 'Ummai Nambi Vandhaen', slides: [{ type: 'title', text: 'Ummai Nambi Vandhaen' }, { type: 'lyric', text: 'Ummai nambi vandhaen\nNaan vetkapadavillai' }] },
+  {
+    id: "song-1",
+    language: "English",
+    title: "Above All Powers",
+    slides: [
+      { type: "title", text: "Above All Powers" },
+      { type: "lyric", text: "[G]Above all [C]powers, [D]above all [G]kings\n[G]Above all [C]nature and [D]all created [G]things\n[Em]Above all [D]wisdom and [C]all the [G/B]ways of man\n[Am]You were here [Am/G]before the world be[D/F#]gan" }
+    ]
+  },
+  {
+    id: "song-2",
+    language: "English",
+    title: "Amazing Grace",
+    slides: [
+      { type: "title", text: "Amazing Grace" },
+      { type: "lyric", text: "[G]Amazing grace! (how [C]sweet the [G]sound)\nThat [G]saved a wretch like [D]me!\nI [G]once was lost, but [C]now am [G]found,\nWas [Em]blind, but [D]now I [G]see." }
+    ]
+  }
 ];
-const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => {
+
+const LANGUAGES = ['English', 'Sinhala', 'Tamil'];
+const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkMode }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [mouseActive, setMouseActive] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [capo, setCapo] = useState(0);
+  const [fontScale, setFontScale] = useState(1);
+  const [lineHeight, setLineHeight] = useState(1.5);
   const viewerRef = useRef(null);
 
   const nextSlide = () => setCurrentSlide(prev => Math.min(prev + 1, song.slides.length - 1));
   const prevSlide = () => setCurrentSlide(prev => Math.max(prev - 1, 0));
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement && viewerRef.current) {
-      viewerRef.current.requestFullscreen().catch(err => console.log(err));
-    } else if (document.exitFullscreen) {
-      document.exitFullscreen();
+    const doc = window.document;
+    const docEl = doc.documentElement;
+
+    const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+    const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+    if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+      if (requestFullScreen) {
+        requestFullScreen.call(docEl).catch(err => console.warn("Fullscreen API error:", err));
+      }
+    } else {
+      if (cancelFullScreen) {
+        cancelFullScreen.call(doc).catch(err => console.warn("Exit fullscreen error:", err));
+      }
     }
   };
 
@@ -67,7 +70,7 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
         prevSlide();
       } else if (e.key === 'Escape') {
         if (isFullscreen) {
-          document.exitFullscreen().catch(() => {});
+          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
         } else {
           onExit();
         }
@@ -96,7 +99,7 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
   const renderLyricLine = (line) => {
     // If chords are off or there are no chords in the line, render as plain text
     if (!globalShowChords || !line.includes('[')) {
-      return <div className="min-h-[1.5em] leading-relaxed">{line.replace(/\[.*?\]/g, '')}</div>;
+      return <div className="min-h-[1.5em]" style={{ lineHeight: lineHeight }}>{line.replace(/\[.*?\]/g, '')}</div>;
     }
 
     // Split text by chord brackets [Chord]
@@ -113,69 +116,89 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
       segments.push(
         <span key={i} className="inline-flex flex-col justify-end whitespace-pre text-left">
           {/* Invisible h-[1em] ensures consistent vertical spacing even if a specific segment has no chord */}
-          <span className="text-yellow-400 font-bold text-[0.45em] leading-none mb-2 h-[1em] drop-shadow-md">
+          <span className={`${darkMode ? 'text-yellow-400' : 'text-blue-600'} font-bold text-[0.45em] leading-none mb-2 h-[1em] drop-shadow-sm`}>
             {transposedChord || ''}
           </span>
-          <span className="leading-tight">{lyric || ''}</span>
+          <span style={{ lineHeight: lineHeight }}>{lyric || ''}</span>
         </span>
       );
     }
     return <div className="flex flex-wrap justify-center items-end">{segments}</div>;
   };
 
+  const uiBg = darkMode ? 'bg-black/60 border-white/10 text-white' : 'bg-white/90 border-black/10 text-black shadow-sm';
+  const btnHover = darkMode ? 'hover:bg-white/20' : 'hover:bg-black/10';
+  const iconColor = darkMode ? 'text-white' : 'text-black';
+
   return (
     <div 
       ref={viewerRef}
-      className={`fixed inset-0 bg-white text-gray-900 z-50 flex flex-col font-sans transition-all duration-300 ${mouseActive ? 'cursor-default' : 'cursor-none'}`}
+      className={`fixed inset-0 z-50 flex flex-col font-sans transition-all duration-300 ${mouseActive ? 'cursor-default' : 'cursor-none'} ${darkMode ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
       {/* Top Header Controls */}
-      <div className={`absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-gradient-to-b from-white/90 to-transparent transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className="text-gray-900/90 font-medium flex items-center gap-2 drop-shadow-sm">
-          <button onClick={onExit} className="p-2 hover:bg-gray-100 rounded-full transition-colors mr-2">
-             <ChevronLeft className="w-6 h-6 text-gray-900" />
+      <div className={`absolute top-0 left-0 right-0 p-4 flex flex-wrap justify-between items-center z-20 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${darkMode ? 'bg-gradient-to-b from-black/80 to-transparent' : 'bg-gradient-to-b from-white/90 to-transparent'}`}>
+        <div className={`font-medium flex items-center gap-2 drop-shadow-sm ${iconColor}`}>
+          <button onClick={onExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover}`}>
+             <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="text-lg">{song.title}</span>
-          <span className="text-gray-500 mx-2">|</span>
+          <span className="text-lg hidden sm:inline">{song.title}</span>
+          <span className="opacity-30 mx-2 hidden sm:inline">|</span>
           <span className="text-sm">Slide {currentSlide + 1} of {song.slides.length}</span>
         </div>
         
-        <div className="flex items-center gap-4 sm:gap-6">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+          
+          {/* Font Controls */}
+          <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-sm border ${uiBg}`} onClick={(e) => e.stopPropagation()}>
+            <span className="text-xs font-bold opacity-70 mr-1">A</span>
+            <button onClick={(e) => { e.currentTarget.blur(); setFontScale(s => Math.max(0.5, +(s - 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>-</button>
+            <span className="w-10 text-center text-sm font-bold">{Math.round(fontScale * 100)}%</span>
+            <button onClick={(e) => { e.currentTarget.blur(); setFontScale(s => Math.min(2.5, +(s + 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>+</button>
+          </div>
+          
+          <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-sm border hidden md:flex ${uiBg}`} onClick={(e) => e.stopPropagation()}>
+            <span className="text-xs font-bold opacity-70 mr-1">↕</span>
+            <button onClick={(e) => { e.currentTarget.blur(); setLineHeight(l => Math.max(1, +(l - 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>-</button>
+            <span className="w-6 text-center text-sm font-bold">{lineHeight.toFixed(1)}</span>
+            <button onClick={(e) => { e.currentTarget.blur(); setLineHeight(l => Math.min(3, +(l + 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>+</button>
+          </div>
+
           {/* Chord Controls */}
           <div 
-            className="flex items-center gap-4 bg-white/75 px-4 py-1.5 rounded-full backdrop-blur-sm border border-gray-200"
+            className={`flex items-center gap-3 px-4 py-1.5 rounded-full backdrop-blur-sm border ${uiBg}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <label className="flex items-center gap-2 cursor-pointer text-gray-900 text-sm font-medium">
+            <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
               <input 
                 type="checkbox" 
                 checked={globalShowChords} 
                 onChange={(e) => setGlobalShowChords(e.target.checked)}
-                className="w-4 h-4 rounded bg-white/20 border-transparent text-blue-500"
+                className="w-4 h-4 rounded bg-black/10 dark:bg-white/20 border-transparent text-blue-500"
               />
               Chords
             </label>
             
             {globalShowChords && (
-              <div className="flex items-center gap-2 border-l border-gray-200 pl-4 text-gray-900 text-sm font-medium">
+              <div className={`flex items-center gap-2 border-l pl-3 text-sm font-medium ${darkMode ? 'border-white/20' : 'border-black/20'}`}>
                 <span>Capo:</span>
                 <button 
                   onClick={(e) => { e.currentTarget.blur(); setCapo(c => Math.max(-11, c - 1)); }}
-                  className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}
                 >-</button>
-                <span className="w-6 text-center font-bold text-gray-900">{capo}</span>
+                <span className="w-5 text-center font-bold">{capo}</span>
                 <button 
                   onClick={(e) => { e.currentTarget.blur(); setCapo(c => Math.min(11, c + 1)); }}
-                  className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}
                 >+</button>
               </div>
             )}
           </div>
 
-          <div className="flex gap-2">
-            <button onClick={toggleFullscreen} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-900" title="Toggle Fullscreen">
+          <div className={`flex gap-1 ${iconColor}`}>
+            <button onClick={toggleFullscreen} className={`p-2 rounded-full transition-colors ${btnHover}`} title="Toggle Fullscreen">
               {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
             </button>
-            <button onClick={onExit} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-900" title="Close Presentation">
+            <button onClick={onExit} className={`p-2 rounded-full transition-colors ${btnHover}`} title="Close Presentation">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -187,9 +210,9 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
         <button 
           onClick={(e) => { e.stopPropagation(); prevSlide(); }}
           disabled={currentSlide === 0}
-          className="p-4 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-900 backdrop-blur-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+          className={`p-4 rounded-full backdrop-blur-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed ${uiBg} ${btnHover}`}
         >
-          <ChevronLeft className="w-10 h-10" />
+          <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
         </button>
       </div>
 
@@ -197,9 +220,9 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
         <button 
           onClick={(e) => { e.stopPropagation(); nextSlide(); }}
           disabled={currentSlide === song.slides.length - 1}
-          className="p-4 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-900 backdrop-blur-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+          className={`p-4 rounded-full backdrop-blur-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed ${uiBg} ${btnHover}`}
         >
-          <ChevronRight className="w-10 h-10" />
+          <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
         </button>
       </div>
 
@@ -210,15 +233,25 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
       </div>
 
       {/* Slide Content Area */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-24 select-none relative z-0">
+      <div 
+        className="flex-1 flex flex-col items-center justify-center p-6 md:p-24 select-none relative z-0"
+        style={{ fontSize: `${fontScale}em` }}
+      >
         {slide?.type === 'title' ? (
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-bold text-center text-gray-900 tracking-tight leading-tight drop-shadow-2xl max-w-7xl mx-auto">
+          <h1 
+            className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-bold text-center tracking-tight drop-shadow-xl max-w-7xl"
+            style={{ lineHeight: lineHeight }}
+          >
             {slide.text}
           </h1>
         ) : (
-          <div className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-semibold text-center text-gray-900 drop-shadow-xl max-w-7xl w-full mx-auto">
+          <div className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-semibold text-center drop-shadow-lg max-w-7xl w-full">
             {slide?.text?.split('\n').map((line, idx) => (
-              <div key={idx} className="flex justify-center w-full mb-4 sm:mb-6 lg:mb-8 last:mb-0">
+              <div 
+                key={idx} 
+                className="flex justify-center w-full"
+                style={{ marginBottom: `${lineHeight * 0.4}em` }}
+              >
                 {renderLyricLine(line)}
               </div>
             ))}
@@ -227,7 +260,7 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
       </div>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-2 bg-white/10 z-20">
+      <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/10 dark:bg-white/10 z-20">
         <div 
           className="h-full bg-blue-500 transition-all duration-300 ease-out"
           style={{ width: `${((currentSlide + 1) / song.slides.length) * 100}%` }}
@@ -408,7 +441,7 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
 
   if (editingSong) {
     return (
-      <div className="w-full p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold dark:text-white flex items-center gap-2">
             <Edit2 className="w-6 h-6" /> {songs.some(s => s.id === editingSong.id) ? 'Edit Song' : 'Add New Song'}
@@ -498,7 +531,7 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
   }
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h2 className="text-3xl font-bold dark:text-white">Admin Dashboard</h2>
         <div className="flex gap-3">
@@ -601,13 +634,13 @@ export default function App() {
 
   return (
     <div className={darkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-200">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-200">
         
         {/* User Dashboard / List View */}
         {activeView === 'list' && (
           <>
             <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
-              <header className="w-full px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <header className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400 flex items-center gap-2">
                   <span>ICC Slides</span>
                 </div>
@@ -644,7 +677,7 @@ export default function App() {
                 </div>
               </header>
 
-              <div className="w-full px-4 py-3 flex overflow-x-auto hide-scrollbar gap-6 text-sm font-medium border-t border-gray-100 dark:border-gray-800/50">
+              <div className="max-w-6xl mx-auto px-4 py-3 flex overflow-x-auto hide-scrollbar gap-6 text-sm font-medium border-t border-gray-100 dark:border-gray-800/50">
                 {LANGUAGES.map(lang => (
                   <button 
                     key={lang}
@@ -657,7 +690,7 @@ export default function App() {
               </div>
             </div>
 
-            <main className="w-full p-4 sm:p-6 lg:p-8 min-h-[80vh]">
+            <main className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 min-h-[80vh]">
               {filteredGroups.length === 0 ? (
                 <div className="text-center py-20">
                   <Music className="w-12 h-12 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
@@ -693,6 +726,7 @@ export default function App() {
             }} 
             globalShowChords={globalShowChords}
             setGlobalShowChords={setGlobalShowChords}
+            darkMode={darkMode}
           />
         )}
 
