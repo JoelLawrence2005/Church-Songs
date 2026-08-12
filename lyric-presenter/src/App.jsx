@@ -323,10 +323,15 @@ const LanguageGroup = ({ group, searchActive, onSelect }) => {
         className="flex items-center gap-2 w-full text-left py-3 border-b border-gray-200 mb-3 group"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h2 className="text-xl font-bold text-gray-800">{group.language}</h2>
+        <h2 
+          className="text-xl font-bold text-black"
+          style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+        >
+          {group.language}
+        </h2>
         {isExpanded ? 
-          <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" /> : 
-          <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          <ChevronUp className="w-5 h-5 text-black group-hover:text-blue-600 transition-colors" /> : 
+          <ChevronDown className="w-5 h-5 text-black group-hover:text-blue-600 transition-colors" />
         }
       </button>
       
@@ -340,7 +345,12 @@ const LanguageGroup = ({ group, searchActive, onSelect }) => {
                 index !== group.songs.length - 1 ? 'border-b border-gray-100' : ''
               }`}
             >
-              <span className="font-medium text-[15px] text-gray-900">{song.title}</span>
+              <span 
+                className="font-medium text-[15px] text-black"
+                style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+              >
+                {song.title}
+              </span>
             </li>
           ))}
         </ul>
@@ -708,7 +718,8 @@ export default function App() {
                   <button 
                     key={lang}
                     onClick={() => scrollToLanguage(lang)}
-                    className="whitespace-nowrap text-gray-600 hover:text-blue-600 transition-colors"
+                    className="whitespace-nowrap text-black font-bold hover:text-blue-600 transition-colors"
+                    style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
                   >
                     {lang}
                   </button>
