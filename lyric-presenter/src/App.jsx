@@ -689,7 +689,7 @@ export default function App() {
             <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
               <header className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="text-2xl font-bold tracking-tight text-blue-600 flex items-center gap-2">
-                  <span>ICC Slides</span>
+                  <span>ICOC Sri Lanka Songs</span>
                 </div>
                 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
