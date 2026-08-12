@@ -156,8 +156,8 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
     return <div className="flex flex-wrap justify-center items-end">{segments}</div>;
   };
 
-  const uiBg = 'bg-white/90 border-black/10 text-black shadow-sm';
-  const btnHover = 'hover:bg-black/10';
+  const uiBg = 'bg-white border-gray-200 text-black shadow-sm';
+  const btnHover = 'hover:bg-gray-100';
   const iconColor = 'text-black';
 
   return (
@@ -166,14 +166,14 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
       className={`fixed inset-0 z-[100] flex flex-col font-sans transition-all duration-300 ${mouseActive ? 'cursor-default' : 'cursor-none'} bg-white text-black`}
     >
       {/* Top Header Controls */}
-      <div className={`absolute top-0 left-0 right-0 p-4 flex flex-wrap justify-between items-center z-30 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'} bg-gradient-to-b from-black/20 to-transparent`}>
+      <div className={`absolute top-0 left-0 right-0 p-4 flex flex-wrap justify-between items-center z-30 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className={`font-medium flex items-center gap-2 ${iconColor}`}>
-          <button onClick={handleExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover} bg-black/10`}>
+          <button onClick={handleExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover} bg-gray-50`}>
              <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="text-lg hidden sm:inline font-bold" style={{ color: '#000000' }}>{song.title}</span>
-          <span className="opacity-50 mx-2 hidden sm:inline" style={{ color: '#000000' }}>|</span>
-          <span className="text-sm font-medium" style={{ color: '#000000' }}>Slide {currentSlide + 1} of {song.slides.length}</span>
+          <span className="text-lg hidden sm:inline font-bold text-black">{song.title}</span>
+          <span className="opacity-50 mx-2 hidden sm:inline text-black">|</span>
+          <span className="text-sm font-medium text-black">Slide {currentSlide + 1} of {song.slides.length}</span>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
@@ -267,21 +267,23 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
       <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-24 select-none relative z-0 bg-white">
         {slide?.type === 'title' ? (
           <h1 
-            className="font-bold text-center tracking-tight max-w-7xl"
+            className="font-bold text-center tracking-tight max-w-7xl text-black"
             style={{ 
               lineHeight: lineHeight,
               fontSize: `calc(clamp(3rem, 8vw, 7rem) * ${fontScale})`,
-              color: '#000000'
+              color: '#000000',
+              WebkitTextFillColor: '#000000'
             }}
           >
             {slide.text}
           </h1>
         ) : (
           <div 
-            className="font-semibold text-center max-w-7xl w-full"
+            className="font-semibold text-center max-w-7xl w-full text-black"
             style={{
               fontSize: `calc(clamp(1.875rem, 5vw, 4.5rem) * ${fontScale})`,
-              color: '#000000'
+              color: '#000000',
+              WebkitTextFillColor: '#000000'
             }}
           >
             {slide?.text?.split('\n').map((line, idx) => (
