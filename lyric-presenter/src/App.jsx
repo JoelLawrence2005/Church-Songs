@@ -26,6 +26,28 @@ const INITIAL_SONGS = [
 ];
 
 const LANGUAGES = ['English', 'Sinhala', 'Tamil'];
+
+const transposeChord = (chord, steps) => {
+  if (!steps) return chord;
+  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const flats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+  
+  const match = chord.match(/^([CDEFGAB][b#]?)(.*)$/);
+  if (!match) return chord;
+  
+  const root = match[1];
+  const suffix = match[2];
+  
+  let index = notes.indexOf(root);
+  if (index === -1) index = flats.indexOf(root);
+  if (index === -1) return chord;
+  
+  let newIndex = (index + steps) % 12;
+  if (newIndex < 0) newIndex += 12;
+  
+  return notes[newIndex] + suffix;
+};
+
 const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkMode }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [mouseActive, setMouseActive] = useState(true);
@@ -38,23 +60,36 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
   const nextSlide = () => setCurrentSlide(prev => Math.min(prev + 1, song.slides.length - 1));
   const prevSlide = () => setCurrentSlide(prev => Math.max(prev - 1, 0));
 
-  const toggleFullscreen = () => {
-    const doc = window.document;
-    const docEl = doc.documentElement;
+  const handleExit = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+    onExit();
+  };
 
-    const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-    const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-
-    if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-      if (requestFullScreen) {
-        requestFullScreen.call(docEl).catch(err => console.warn("Fullscreen API error:", err));
+  const toggleFullscreen = (e) => {
+    if (e) e.stopPropagation();
+    if (!document.fullscreenElement) {
+      if (viewerRef.current?.requestFullscreen) {
+        viewerRef.current.requestFullscreen().catch(err => console.warn(err));
+      } else if (viewerRef.current?.webkitRequestFullscreen) {
+        viewerRef.current.webkitRequestFullscreen();
       }
     } else {
-      if (cancelFullScreen) {
-        cancelFullScreen.call(doc).catch(err => console.warn("Exit fullscreen error:", err));
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => console.warn(err));
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
       }
     }
   };
+
+  const increaseFont = (e) => { e.stopPropagation(); e.currentTarget.blur(); setFontScale(s => Math.min(2.5, Math.round((s + 0.1)*10)/10)); };
+  const decreaseFont = (e) => { e.stopPropagation(); e.currentTarget.blur(); setFontScale(s => Math.max(0.5, Math.round((s - 0.1)*10)/10)); };
+  
+  const increaseLineHeight = (e) => { e.stopPropagation(); e.currentTarget.blur(); setLineHeight(l => Math.min(3.0, Math.round((l + 0.1)*10)/10)); };
+  const decreaseLineHeight = (e) => { e.stopPropagation(); e.currentTarget.blur(); setLineHeight(l => Math.max(1.0, Math.round((l - 0.1)*10)/10)); };
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -69,9 +104,7 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
       } else if (e.key === 'ArrowLeft') {
         prevSlide();
       } else if (e.key === 'Escape') {
-        if (isFullscreen) {
-          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        } else {
+        if (!document.fullscreenElement) {
           onExit();
         }
       }
@@ -97,12 +130,10 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
   const slide = song.slides[currentSlide];
 
   const renderLyricLine = (line) => {
-    // If chords are off or there are no chords in the line, render as plain text
     if (!globalShowChords || !line.includes('[')) {
       return <div className="min-h-[1.5em]" style={{ lineHeight: lineHeight }}>{line.replace(/\[.*?\]/g, '')}</div>;
     }
 
-    // Split text by chord brackets [Chord]
     const parts = line.split(/\[(.*?)\]/);
     const segments = [];
 
@@ -115,8 +146,7 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
 
       segments.push(
         <span key={i} className="inline-flex flex-col justify-end whitespace-pre text-left">
-          {/* Invisible h-[1em] ensures consistent vertical spacing even if a specific segment has no chord */}
-          <span className={`${darkMode ? 'text-yellow-400' : 'text-blue-600'} font-bold text-[0.45em] leading-none mb-2 h-[1em] drop-shadow-sm`}>
+          <span className="text-blue-600 font-bold text-[0.45em] leading-none mb-2 h-[1em]">
             {transposedChord || ''}
           </span>
           <span style={{ lineHeight: lineHeight }}>{lyric || ''}</span>
@@ -126,46 +156,47 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
     return <div className="flex flex-wrap justify-center items-end">{segments}</div>;
   };
 
-  const uiBg = darkMode ? 'bg-black/60 border-white/10 text-white' : 'bg-white/90 border-black/10 text-black shadow-sm';
+  const uiBg = darkMode ? 'bg-black/80 border-white/10 text-white' : 'bg-white/90 border-black/10 text-black shadow-sm';
   const btnHover = darkMode ? 'hover:bg-white/20' : 'hover:bg-black/10';
   const iconColor = darkMode ? 'text-white' : 'text-black';
 
   return (
     <div 
       ref={viewerRef}
-      className={`fixed inset-0 z-50 flex flex-col font-sans transition-all duration-300 ${mouseActive ? 'cursor-default' : 'cursor-none'} ${darkMode ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`fixed inset-0 z-[100] flex flex-col font-sans transition-all duration-300 ${mouseActive ? 'cursor-default' : 'cursor-none'} bg-white text-black`}
     >
       {/* Top Header Controls */}
-      <div className={`absolute top-0 left-0 right-0 p-4 flex flex-wrap justify-between items-center z-20 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${darkMode ? 'bg-gradient-to-b from-black/80 to-transparent' : 'bg-gradient-to-b from-white/90 to-transparent'}`}>
-        <div className={`font-medium flex items-center gap-2 drop-shadow-sm ${iconColor}`}>
-          <button onClick={onExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover}`}>
+      <div className={`absolute top-0 left-0 right-0 p-4 flex flex-wrap justify-between items-center z-30 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${darkMode ? 'bg-gradient-to-b from-black/80 to-transparent' : 'bg-gradient-to-b from-black/20 to-transparent'}`}>
+        <div className={`font-medium flex items-center gap-2 ${iconColor}`}>
+          <button onClick={handleExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover} bg-black/10 dark:bg-white/10`}>
              <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="text-lg hidden sm:inline">{song.title}</span>
-          <span className="opacity-30 mx-2 hidden sm:inline">|</span>
-          <span className="text-sm">Slide {currentSlide + 1} of {song.slides.length}</span>
+          <span className="text-lg hidden sm:inline drop-shadow-md">{song.title}</span>
+          <span className="opacity-50 mx-2 hidden sm:inline drop-shadow-md">|</span>
+          <span className="text-sm drop-shadow-md">Slide {currentSlide + 1} of {song.slides.length}</span>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           
           {/* Font Controls */}
-          <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-sm border ${uiBg}`} onClick={(e) => e.stopPropagation()}>
+          <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-md border ${uiBg}`} onClick={(e) => e.stopPropagation()}>
             <span className="text-xs font-bold opacity-70 mr-1">A</span>
-            <button onClick={(e) => { e.currentTarget.blur(); setFontScale(s => Math.max(0.5, +(s - 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>-</button>
+            <button onClick={decreaseFont} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>-</button>
             <span className="w-10 text-center text-sm font-bold">{Math.round(fontScale * 100)}%</span>
-            <button onClick={(e) => { e.currentTarget.blur(); setFontScale(s => Math.min(2.5, +(s + 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>+</button>
+            <button onClick={increaseFont} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>+</button>
           </div>
           
-          <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-sm border hidden md:flex ${uiBg}`} onClick={(e) => e.stopPropagation()}>
+          {/* Line Height Controls */}
+          <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-md border hidden md:flex ${uiBg}`} onClick={(e) => e.stopPropagation()}>
             <span className="text-xs font-bold opacity-70 mr-1">↕</span>
-            <button onClick={(e) => { e.currentTarget.blur(); setLineHeight(l => Math.max(1, +(l - 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>-</button>
+            <button onClick={decreaseLineHeight} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>-</button>
             <span className="w-6 text-center text-sm font-bold">{lineHeight.toFixed(1)}</span>
-            <button onClick={(e) => { e.currentTarget.blur(); setLineHeight(l => Math.min(3, +(l + 0.1).toFixed(1))); }} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>+</button>
+            <button onClick={increaseLineHeight} className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${btnHover}`}>+</button>
           </div>
 
           {/* Chord Controls */}
           <div 
-            className={`flex items-center gap-3 px-4 py-1.5 rounded-full backdrop-blur-sm border ${uiBg}`}
+            className={`flex items-center gap-3 px-4 py-1.5 rounded-full backdrop-blur-md border ${uiBg}`}
             onClick={(e) => e.stopPropagation()}
           >
             <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
@@ -195,10 +226,10 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
           </div>
 
           <div className={`flex gap-1 ${iconColor}`}>
-            <button onClick={toggleFullscreen} className={`p-2 rounded-full transition-colors ${btnHover}`} title="Toggle Fullscreen">
+            <button onClick={toggleFullscreen} className={`p-2 rounded-full transition-colors ${btnHover} bg-black/10 dark:bg-white/10`} title="Toggle Fullscreen">
               {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
             </button>
-            <button onClick={onExit} className={`p-2 rounded-full transition-colors ${btnHover}`} title="Close Presentation">
+            <button onClick={handleExit} className={`p-2 rounded-full transition-colors ${btnHover} bg-black/10 dark:bg-white/10`} title="Close Presentation">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -206,21 +237,21 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
       </div>
 
       {/* Visible Side Navigation Arrows (Fade out with mouse inactivity) */}
-      <div className={`absolute inset-y-0 left-4 flex items-center z-20 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute inset-y-0 left-4 flex items-center z-20 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button 
           onClick={(e) => { e.stopPropagation(); prevSlide(); }}
           disabled={currentSlide === 0}
-          className={`p-4 rounded-full backdrop-blur-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed ${uiBg} ${btnHover}`}
+          className={`p-4 rounded-full backdrop-blur-md transition-all disabled:opacity-0 disabled:cursor-not-allowed ${uiBg} ${btnHover}`}
         >
           <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
         </button>
       </div>
 
-      <div className={`absolute inset-y-0 right-4 flex items-center z-20 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute inset-y-0 right-4 flex items-center z-20 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button 
           onClick={(e) => { e.stopPropagation(); nextSlide(); }}
           disabled={currentSlide === song.slides.length - 1}
-          className={`p-4 rounded-full backdrop-blur-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed ${uiBg} ${btnHover}`}
+          className={`p-4 rounded-full backdrop-blur-md transition-all disabled:opacity-0 disabled:cursor-not-allowed ${uiBg} ${btnHover}`}
         >
           <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
         </button>
@@ -233,19 +264,24 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
       </div>
 
       {/* Slide Content Area */}
-      <div 
-        className="flex-1 flex flex-col items-center justify-center p-6 md:p-24 select-none relative z-0"
-        style={{ fontSize: `${fontScale}em` }}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-24 select-none relative z-0 bg-white">
         {slide?.type === 'title' ? (
           <h1 
-            className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-bold text-center tracking-tight drop-shadow-xl max-w-7xl"
-            style={{ lineHeight: lineHeight }}
+            className="font-bold text-center tracking-tight max-w-7xl text-black"
+            style={{ 
+              lineHeight: lineHeight,
+              fontSize: `calc(clamp(3rem, 8vw, 7rem) * ${fontScale})`
+            }}
           >
             {slide.text}
           </h1>
         ) : (
-          <div className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-semibold text-center drop-shadow-lg max-w-7xl w-full">
+          <div 
+            className="font-semibold text-center max-w-7xl w-full text-black"
+            style={{
+              fontSize: `calc(clamp(1.875rem, 5vw, 4.5rem) * ${fontScale})`
+            }}
+          >
             {slide?.text?.split('\n').map((line, idx) => (
               <div 
                 key={idx} 
@@ -260,7 +296,7 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
       </div>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/10 dark:bg-white/10 z-20">
+      <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/5 z-30">
         <div 
           className="h-full bg-blue-500 transition-all duration-300 ease-out"
           style={{ width: `${((currentSlide + 1) / song.slides.length) * 100}%` }}
