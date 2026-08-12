@@ -48,7 +48,7 @@ const transposeChord = (chord, steps) => {
   return notes[newIndex] + suffix;
 };
 
-const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkMode }) => {
+const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [mouseActive, setMouseActive] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -156,9 +156,9 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
     return <div className="flex flex-wrap justify-center items-end">{segments}</div>;
   };
 
-  const uiBg = darkMode ? 'bg-black/80 border-white/10 text-white' : 'bg-white/90 border-black/10 text-black shadow-sm';
-  const btnHover = darkMode ? 'hover:bg-white/20' : 'hover:bg-black/10';
-  const iconColor = darkMode ? 'text-white' : 'text-black';
+  const uiBg = 'bg-white/90 border-black/10 text-black shadow-sm';
+  const btnHover = 'hover:bg-black/10';
+  const iconColor = 'text-black';
 
   return (
     <div 
@@ -166,14 +166,14 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
       className={`fixed inset-0 z-[100] flex flex-col font-sans transition-all duration-300 ${mouseActive ? 'cursor-default' : 'cursor-none'} bg-white text-black`}
     >
       {/* Top Header Controls */}
-      <div className={`absolute top-0 left-0 right-0 p-4 flex flex-wrap justify-between items-center z-30 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${darkMode ? 'bg-gradient-to-b from-black/80 to-transparent' : 'bg-gradient-to-b from-black/20 to-transparent'}`}>
+      <div className={`absolute top-0 left-0 right-0 p-4 flex flex-wrap justify-between items-center z-30 transition-opacity duration-300 ${mouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'} bg-gradient-to-b from-black/20 to-transparent`}>
         <div className={`font-medium flex items-center gap-2 ${iconColor}`}>
-          <button onClick={handleExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover} bg-black/10 dark:bg-white/10`}>
+          <button onClick={handleExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover} bg-black/10`}>
              <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="text-lg hidden sm:inline drop-shadow-md">{song.title}</span>
-          <span className="opacity-50 mx-2 hidden sm:inline drop-shadow-md">|</span>
-          <span className="text-sm drop-shadow-md">Slide {currentSlide + 1} of {song.slides.length}</span>
+          <span className="text-lg hidden sm:inline text-black font-semibold">{song.title}</span>
+          <span className="opacity-50 mx-2 hidden sm:inline text-black">|</span>
+          <span className="text-sm text-black">Slide {currentSlide + 1} of {song.slides.length}</span>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
@@ -204,13 +204,13 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
                 type="checkbox" 
                 checked={globalShowChords} 
                 onChange={(e) => setGlobalShowChords(e.target.checked)}
-                className="w-4 h-4 rounded bg-black/10 dark:bg-white/20 border-transparent text-blue-500"
+                className="w-4 h-4 rounded bg-black/10 border-transparent text-blue-500"
               />
               Chords
             </label>
             
             {globalShowChords && (
-              <div className={`flex items-center gap-2 border-l pl-3 text-sm font-medium ${darkMode ? 'border-white/20' : 'border-black/20'}`}>
+              <div className="flex items-center gap-2 border-l pl-3 text-sm font-medium border-black/20">
                 <span>Capo:</span>
                 <button 
                   onClick={(e) => { e.currentTarget.blur(); setCapo(c => Math.max(-11, c - 1)); }}
@@ -226,10 +226,10 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords, darkM
           </div>
 
           <div className={`flex gap-1 ${iconColor}`}>
-            <button onClick={toggleFullscreen} className={`p-2 rounded-full transition-colors ${btnHover} bg-black/10 dark:bg-white/10`} title="Toggle Fullscreen">
+            <button onClick={toggleFullscreen} className={`p-2 rounded-full transition-colors ${btnHover} bg-black/10`} title="Toggle Fullscreen">
               {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
             </button>
-            <button onClick={handleExit} className={`p-2 rounded-full transition-colors ${btnHover} bg-black/10 dark:bg-white/10`} title="Close Presentation">
+            <button onClick={handleExit} className={`p-2 rounded-full transition-colors ${btnHover} bg-black/10`} title="Close Presentation">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -316,10 +316,10 @@ const LanguageGroup = ({ group, searchActive, onSelect }) => {
   return (
     <div id={`lang-${group.language}`} className="scroll-mt-36 mb-6">
       <button 
-        className="flex items-center gap-2 w-full text-left py-3 border-b dark:border-gray-800 mb-3 group"
+        className="flex items-center gap-2 w-full text-left py-3 border-b border-gray-200 mb-3 group"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{group.language}</h2>
+        <h2 className="text-xl font-bold text-gray-800">{group.language}</h2>
         {isExpanded ? 
           <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" /> : 
           <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
@@ -327,13 +327,13 @@ const LanguageGroup = ({ group, searchActive, onSelect }) => {
       </button>
       
       {isExpanded && (
-        <ul className="flex flex-col border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+        <ul className="flex flex-col border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
           {group.songs.map((song, index) => (
             <li 
               key={song.id}
               onClick={() => onSelect(song)}
-              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors text-gray-800 dark:text-gray-200 flex items-center ${
-                index !== group.songs.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''
+              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors text-gray-800 flex items-center ${
+                index !== group.songs.length - 1 ? 'border-b border-gray-100' : ''
               }`}
             >
               <span className="font-medium text-[15px]">{song.title}</span>
@@ -360,37 +360,37 @@ const LoginForm = ({ onLogin, onCancel }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <Lock className="w-6 h-6 text-blue-500" /> Admin Access
           </h2>
-          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
             <X className="w-6 h-6" />
           </button>
         </div>
         
-        {error && <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-3 rounded-lg mb-4 text-sm font-medium">{error}</div>}
+        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm font-medium">{error}</div>}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
             <input 
               type="text" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-950 outline-none transition-colors dark:text-white"
+              className="w-full px-4 py-2 rounded-lg bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-colors"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input 
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-950 outline-none transition-colors dark:text-white"
+              className="w-full px-4 py-2 rounded-lg bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-colors"
               required
             />
           </div>
@@ -475,11 +475,11 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
     return (
       <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold dark:text-white flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Edit2 className="w-6 h-6" /> {songs.some(s => s.id === editingSong.id) ? 'Edit Song' : 'Add New Song'}
           </h2>
           <div className="flex gap-2">
-            <button onClick={() => setEditingSong(null)} className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            <button onClick={() => setEditingSong(null)} className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
               Cancel
             </button>
             <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors">
@@ -488,24 +488,24 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 space-y-4">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Song Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Song Title</label>
               <input 
                 type="text" 
                 value={editingSong.title}
                 onChange={(e) => setEditingSong({...editingSong, title: e.target.value})}
-                className="w-full px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:border-blue-500 outline-none dark:text-white"
+                className="w-full px-4 py-2 rounded-lg bg-gray-50 border border-gray-300 focus:border-blue-500 outline-none"
                 placeholder="Enter song title..."
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language Category</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Language Category</label>
               <select 
                 value={editingSong.language}
                 onChange={(e) => setEditingSong({...editingSong, language: e.target.value})}
-                className="w-full px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:border-blue-500 outline-none dark:text-white"
+                className="w-full px-4 py-2 rounded-lg bg-gray-50 border border-gray-300 focus:border-blue-500 outline-none"
               >
                 {LANGUAGES.map(lang => (
                   <option key={lang} value={lang}>{lang}</option>
@@ -515,17 +515,17 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
           </div>
         </div>
 
-        <h3 className="text-xl font-bold dark:text-white mb-4">Slides Content</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Slides Content</h3>
         <div className="space-y-4">
           {editingSong.slides.map((slide, index) => (
-            <div key={index} className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex gap-4">
+            <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex gap-4">
               <div className="flex-1 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Slide {index + 1}</span>
+                  <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Slide {index + 1}</span>
                   <select 
                     value={slide.type}
                     onChange={(e) => updateSlide(index, 'type', e.target.value)}
-                    className="px-3 py-1 text-sm rounded bg-gray-100 dark:bg-gray-800 border-none outline-none dark:text-white"
+                    className="px-3 py-1 text-sm rounded bg-gray-100 border-none outline-none"
                   >
                     <option value="title">Title Slide</option>
                     <option value="lyric">Lyric Slide</option>
@@ -534,15 +534,15 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
                 <textarea 
                   value={slide.text}
                   onChange={(e) => updateSlide(index, 'text', e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:border-blue-500 outline-none dark:text-white min-h-[120px] resize-y"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 focus:border-blue-500 outline-none min-h-[120px] resize-y"
                   placeholder={slide.type === 'title' ? "Enter Song Title..." : "Enter lyrics here...\nUse enter for new lines.\nTo add chords, type them in brackets before the word: [G]Amazing [C]grace"}
                 />
               </div>
-              <div className="flex flex-col justify-center border-l border-gray-200 dark:border-gray-800 pl-4">
+              <div className="flex flex-col justify-center border-l border-gray-200 pl-4">
                 <button 
                   onClick={() => removeSlide(index)}
                   disabled={editingSong.slides.length === 1}
-                  className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-30"
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30"
                   title="Remove Slide"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -554,7 +554,7 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
         
         <button 
           onClick={addSlide}
-          className="w-full mt-4 py-4 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-600 dark:text-gray-400 hover:text-blue-600 flex items-center justify-center gap-2 transition-colors font-medium"
+          className="w-full mt-4 py-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-gray-600 hover:text-blue-600 flex items-center justify-center gap-2 transition-colors font-medium"
         >
           <Plus className="w-5 h-5" /> Add New Slide
         </button>
@@ -565,12 +565,12 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <h2 className="text-3xl font-bold dark:text-white">Admin Dashboard</h2>
+        <h2 className="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
         <div className="flex gap-3">
           <button onClick={handleAddNew} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm">
             <Plus className="w-4 h-4" /> Add Song
           </button>
-          <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium">
+          <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 hover:bg-gray-300 rounded-lg transition-colors font-medium">
             <LogOut className="w-4 h-4" /> Logout
           </button>
         </div>
@@ -582,28 +582,27 @@ const AdminPanel = ({ songs, setSongs, onLogout }) => {
           if (langSongs.length === 0) return null;
 
           return (
-            <div key={lang} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
-              <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-3 border-b border-gray-200 dark:border-gray-800">
-                <h3 className="font-bold text-gray-800 dark:text-gray-200">{lang} Songs ({langSongs.length})</h3>
+            <div key={lang} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                <h3 className="font-bold text-gray-800">{lang} Songs ({langSongs.length})</h3>
               </div>
-              <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+              <ul className="divide-y divide-gray-100">
                 {langSongs.map(song => (
-                  <li key={song.id} className="p-4 sm:px-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <li key={song.id} className="p-4 sm:px-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <Music className="w-5 h-5 text-gray-400" />
-                      <span className="font-medium dark:text-white">{song.title}</span>
+                      <span className="font-medium text-gray-900">{song.title}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => setEditingSong(song)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Edit Song"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDelete(song.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete Song"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -633,7 +632,6 @@ export default function App() {
   const [activeView, setActiveView] = useState('list'); // 'list' | 'viewer' | 'login' | 'admin'
   const [selectedSong, setSelectedSong] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
   const [isAdminAuth, setIsAdminAuth] = useState(false);
   const [globalShowChords, setGlobalShowChords] = useState(true);
 
@@ -665,15 +663,15 @@ export default function App() {
   };
 
   return (
-    <div className={darkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-200">
+    <div>
+      <div className="min-h-screen bg-gray-50 text-gray-900 font-sans transition-colors duration-200">
         
         {/* User Dashboard / List View */}
         {activeView === 'list' && (
           <>
-            <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
+            <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
               <header className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                <div className="text-2xl font-bold tracking-tight text-blue-600 flex items-center gap-2">
                   <span>ICC Slides</span>
                 </div>
                 
@@ -683,38 +681,30 @@ export default function App() {
                     <input 
                       type="text" 
                       placeholder="Search songs..." 
-                      className="w-full pl-9 pr-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:w-64 transition-all"
+                      className="w-full pl-9 pr-4 py-2 rounded-full bg-gray-100 border-transparent focus:border-blue-500 focus:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:w-64 transition-all"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
                   
-                  <div className="flex items-center gap-1 border-l border-gray-300 dark:border-gray-700 pl-3 ml-1">
-                    <button 
-                      onClick={() => setDarkMode(!darkMode)} 
-                      className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
-                      title="Toggle Dark Mode"
-                    >
-                      {darkMode ? <Sun className="w-4 h-4 text-gray-400" /> : <Moon className="w-4 h-4 text-gray-600" />}
-                    </button>
-                    
+                  <div className="flex items-center gap-1 border-l border-gray-300 pl-3 ml-1">
                     <button 
                       onClick={() => isAdminAuth ? setActiveView('admin') : setActiveView('login')}
-                      className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+                      className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex-shrink-0"
                       title="Admin Panel"
                     >
-                      <Lock className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                      <Lock className="w-4 h-4 text-gray-600" />
                     </button>
                   </div>
                 </div>
               </header>
 
-              <div className="max-w-6xl mx-auto px-4 py-3 flex overflow-x-auto hide-scrollbar gap-6 text-sm font-medium border-t border-gray-100 dark:border-gray-800/50">
+              <div className="max-w-6xl mx-auto px-4 py-3 flex overflow-x-auto hide-scrollbar gap-6 text-sm font-medium border-t border-gray-100">
                 {LANGUAGES.map(lang => (
                   <button 
                     key={lang}
                     onClick={() => scrollToLanguage(lang)}
-                    className="whitespace-nowrap text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    className="whitespace-nowrap text-gray-600 hover:text-blue-600 transition-colors"
                   >
                     {lang}
                   </button>
@@ -725,9 +715,9 @@ export default function App() {
             <main className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 min-h-[80vh]">
               {filteredGroups.length === 0 ? (
                 <div className="text-center py-20">
-                  <Music className="w-12 h-12 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200">No songs found</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search query.</p>
+                  <Music className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900">No songs found</h3>
+                  <p className="text-gray-500 mt-1">Try adjusting your search query.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -758,7 +748,6 @@ export default function App() {
             }} 
             globalShowChords={globalShowChords}
             setGlobalShowChords={setGlobalShowChords}
-            darkMode={darkMode}
           />
         )}
 
@@ -777,8 +766,8 @@ export default function App() {
         {activeView === 'admin' && (
           <>
              {/* Simple Admin Header */}
-             <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm p-4 flex justify-between items-center">
-                <button onClick={() => setActiveView('list')} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">
+             <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm p-4 flex justify-between items-center">
+                <button onClick={() => setActiveView('list')} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
                   <ChevronLeft className="w-5 h-5" /> Back to Songs
                 </button>
                 <div className="text-gray-500 text-sm font-semibold uppercase tracking-widest">Administrator</div>
