@@ -171,9 +171,9 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
           <button onClick={handleExit} className={`p-2 rounded-full transition-colors mr-2 ${btnHover} bg-black/10`}>
              <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="text-lg hidden sm:inline text-black font-semibold">{song.title}</span>
-          <span className="opacity-50 mx-2 hidden sm:inline text-black">|</span>
-          <span className="text-sm text-black">Slide {currentSlide + 1} of {song.slides.length}</span>
+          <span className="text-lg hidden sm:inline font-bold" style={{ color: '#000000' }}>{song.title}</span>
+          <span className="opacity-50 mx-2 hidden sm:inline" style={{ color: '#000000' }}>|</span>
+          <span className="text-sm font-medium" style={{ color: '#000000' }}>Slide {currentSlide + 1} of {song.slides.length}</span>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
@@ -267,19 +267,21 @@ const SongViewer = ({ song, onExit, globalShowChords, setGlobalShowChords }) => 
       <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-24 select-none relative z-0 bg-white">
         {slide?.type === 'title' ? (
           <h1 
-            className="font-bold text-center tracking-tight max-w-7xl text-black"
+            className="font-bold text-center tracking-tight max-w-7xl"
             style={{ 
               lineHeight: lineHeight,
-              fontSize: `calc(clamp(3rem, 8vw, 7rem) * ${fontScale})`
+              fontSize: `calc(clamp(3rem, 8vw, 7rem) * ${fontScale})`,
+              color: '#000000'
             }}
           >
             {slide.text}
           </h1>
         ) : (
           <div 
-            className="font-semibold text-center max-w-7xl w-full text-black"
+            className="font-semibold text-center max-w-7xl w-full"
             style={{
-              fontSize: `calc(clamp(1.875rem, 5vw, 4.5rem) * ${fontScale})`
+              fontSize: `calc(clamp(1.875rem, 5vw, 4.5rem) * ${fontScale})`,
+              color: '#000000'
             }}
           >
             {slide?.text?.split('\n').map((line, idx) => (
@@ -332,11 +334,11 @@ const LanguageGroup = ({ group, searchActive, onSelect }) => {
             <li 
               key={song.id}
               onClick={() => onSelect(song)}
-              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors text-gray-800 flex items-center ${
+              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center ${
                 index !== group.songs.length - 1 ? 'border-b border-gray-100' : ''
               }`}
             >
-              <span className="font-medium text-[15px]">{song.title}</span>
+              <span className="font-medium text-[15px] text-gray-900">{song.title}</span>
             </li>
           ))}
         </ul>
