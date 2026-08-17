@@ -149,7 +149,7 @@ export default function App() {
               className="text-3xl font-extrabold tracking-tight" 
               style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
             >
-              ICC Slides
+              ICOC Slides
             </h1>
             <button 
               onClick={() => setCurrentView('admin')}
