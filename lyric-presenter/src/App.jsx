@@ -106,14 +106,28 @@ export default function App() {
   };
 
   const handleDeleteSong = async (id) => {
+    if (!id) return;
     if (!window.confirm('Are you sure you want to delete this song?')) return;
+    
     try {
-      const res = await fetch(`/api/songs?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/songs?id=${id}`, { 
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+
       if (res.ok) {
-        setSongs(songs.filter(s => s.id !== id));
+        setSongs(prevSongs => prevSongs.filter(s => s.id !== id));
+        if (editingSong?.id === id) {
+          setEditingSong(null);
+        }
+      } else {
+        const data = await res.json();
+        alert(`Failed to delete: ${data.error || 'Unknown server error'}`);
       }
     } catch (err) {
       console.error("Error deleting song:", err);
+      alert(`Network error: ${err.message}`);
     }
   };
 
