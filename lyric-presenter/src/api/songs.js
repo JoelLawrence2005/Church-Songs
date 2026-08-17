@@ -1,3 +1,4 @@
+// api/songs.js
 import { MongoClient, ObjectId } from 'mongodb';
 
 const uri = process.env.MONGODB_URI || "mongodb+srv://ICOC:ICOC%401234@church-songs.7f6ysfq.mongodb.net/?appName=church-songs";
@@ -25,6 +26,14 @@ export default async function handler(req, res) {
     const db = client.db('church_db');
     const collection = db.collection('songs');
 
+    // Parse body if received as string
+    let body = req.body;
+    if (typeof body === 'string' && body.length > 0) {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {}
+    }
+
     if (req.method === 'GET') {
       const songs = await collection.find({}).toArray();
       const formatted = songs.map(s => ({
@@ -37,18 +46,18 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { title, language, slides } = req.body;
-      const result = await collection.insertOne({ title, language, slides });
-      return res.status(201).json({ id: result.insertedId.toString(), title, language, slides });
+      const { title, language, slides } = body || {};
+      const result = await collection.insertOne({ title, language, slides: slides || [] });
+      return res.status(201).json({ id: result.insertedId.toString(), title, language, slides: slides || [] });
     }
 
     if (req.method === 'PUT') {
-      const { id, title, language, slides } = req.body;
+      const { id, title, language, slides } = body || {};
       await collection.updateOne(
         { _id: new ObjectId(id) },
-        { $set: { title, language, slides } }
+        { $set: { title, language, slides: slides || [] } }
       );
-      return res.status(200).json({ id, title, language, slides });
+      return res.status(200).json({ id, title, language, slides: slides || [] });
     }
 
     if (req.method === 'DELETE') {
