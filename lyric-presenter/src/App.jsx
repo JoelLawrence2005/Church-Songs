@@ -6,17 +6,16 @@ import {
   ChevronLeft, 
   ChevronRight, 
   X, 
-  Maximize, 
-  Minimize, 
   Lock, 
-  Plus, 
   Trash2, 
   Edit, 
   Save, 
   LogOut,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  DownloadCloud,
+  Link
 } from 'lucide-react';
 
 const transposeChord = (chord, semitones) => {
@@ -36,13 +35,12 @@ const transposeChord = (chord, semitones) => {
 export default function App() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('list'); // 'list', 'view', 'admin'
+  const [currentView, setCurrentView] = useState('list');
   const [selectedSong, setSelectedSong] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [expandedSections, setExpandedSections] = useState({ English: true, Sinhala: true, Tamil: true });
 
-  // Admin Auth State
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
@@ -128,23 +126,20 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
-      {/* LIST VIEW (MAIN PAGE) */}
+      {/* MAIN VIEW */}
       {currentView === 'list' && (
         <div className="max-w-3xl mx-auto px-4 py-8">
-          {/* Top Bar */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-extrabold tracking-tight text-black">ICC Slides</h1>
             <button 
               onClick={() => setCurrentView('admin')}
               className="p-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-black transition flex items-center gap-1.5 text-sm font-semibold"
-              title="Admin Portal"
             >
               <Lock size={18} className="text-black" />
               <span>Admin</span>
             </button>
           </div>
 
-          {/* Search Bar */}
           <div className="relative mb-6">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
             <input 
@@ -156,7 +151,6 @@ export default function App() {
             />
           </div>
 
-          {/* Language Filter Tabs */}
           <div className="flex gap-2 mb-8 pb-3 border-b border-gray-200 overflow-x-auto">
             {languages.map(lang => (
               <button
@@ -177,7 +171,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Song Category Lists */}
           {loading ? (
             <div className="flex justify-center items-center py-24 text-gray-600 font-medium">
               <RefreshCw className="animate-spin mr-2" size={22} /> Loading song library...
@@ -263,7 +256,6 @@ function SongViewer({ song, onExit }) {
   const [fontScale, setFontScale] = useState(1);
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
-  const viewerRef = useRef(null);
 
   const slides = [{ type: 'title', content: song.title }, ...(song.slides || []).map(s => ({ type: 'lyrics', content: s }))];
 
@@ -324,22 +316,18 @@ function SongViewer({ song, onExit }) {
 
   return (
     <div 
-      ref={viewerRef}
       onMouseMove={handleMouseMove}
       className="fixed inset-0 bg-white z-50 flex flex-col justify-between select-none overflow-hidden"
     >
-      {/* Top Floating Control Bar */}
       <div className={`p-4 flex justify-between items-center transition-opacity duration-300 bg-gradient-to-b from-white/90 to-transparent ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button 
           onClick={onExit} 
           className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-black transition shadow-sm pointer-events-auto"
-          title="Exit to song list (Esc)"
         >
           <X size={24} className="text-black" />
         </button>
 
         <div className="flex items-center gap-3 bg-white border border-gray-300 px-4 py-2 rounded-full shadow-md pointer-events-auto">
-          {/* Chords Toggle */}
           <button 
             onClick={() => setShowChords(!showChords)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold transition ${
@@ -352,7 +340,6 @@ function SongViewer({ song, onExit }) {
 
           <div className="h-4 w-px bg-gray-300" />
 
-          {/* Capo */}
           <div className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
             <span>Capo {capo}</span>
             <button onClick={() => setCapo(c => c - 1)} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">-</button>
@@ -361,7 +348,6 @@ function SongViewer({ song, onExit }) {
 
           <div className="h-4 w-px bg-gray-300" />
 
-          {/* Font Scale */}
           <div className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
             <span>A</span>
             <button onClick={() => setFontScale(s => Math.max(0.6, Number((s - 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">-</button>
@@ -371,7 +357,6 @@ function SongViewer({ song, onExit }) {
         </div>
       </div>
 
-      {/* Slide Display Canvas */}
       <div className="flex-1 flex items-center justify-center px-12 text-center overflow-auto">
         {slides[currentSlideIndex].type === 'title' ? (
           <h1 
@@ -390,7 +375,6 @@ function SongViewer({ song, onExit }) {
         )}
       </div>
 
-      {/* Navigation Floating Buttons */}
       <button 
         onClick={prevSlide} 
         disabled={currentSlideIndex === 0}
@@ -411,7 +395,6 @@ function SongViewer({ song, onExit }) {
         <ChevronRight size={36} className="text-black" />
       </button>
 
-      {/* Footer Indicator */}
       <div className="p-4 text-center text-sm font-semibold text-gray-500">
         {currentSlideIndex + 1} / {slides.length}
       </div>
@@ -436,6 +419,9 @@ function AdminPanel({
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('English');
   const [slidesText, setSlidesText] = useState('');
+  const [ugUrl, setUgUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState('');
 
   useEffect(() => {
     if (editingSong) {
@@ -449,6 +435,36 @@ function AdminPanel({
     }
   }, [editingSong]);
 
+  const handleImportUG = async (e) => {
+    e.preventDefault();
+    if (!ugUrl.trim()) return;
+
+    setIsImporting(true);
+    setImportStatus('Fetching chords from Ultimate Guitar...');
+
+    try {
+      const res = await fetch('/api/import-ug', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: ugUrl })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Import failed');
+      }
+
+      setTitle(data.title || title);
+      setSlidesText(data.slidesText || '');
+      setImportStatus('Successfully imported! Review slides below before saving.');
+      setUgUrl('');
+    } catch (err) {
+      setImportStatus('Error: ' + err.message);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const handleSubmitSong = (e) => {
     e.preventDefault();
     const slides = slidesText.split(/\n\s*---\s*\n/).map(s => s.trim()).filter(Boolean);
@@ -460,7 +476,6 @@ function AdminPanel({
     });
   };
 
-  // Login Modal / Screen
   if (!isLoggedIn) {
     return (
       <div className="max-w-md mx-auto px-4 py-20">
@@ -507,13 +522,12 @@ function AdminPanel({
     );
   }
 
-  // Logged-in Dashboard
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
         <div>
           <h2 className="text-2xl font-extrabold text-black">Song Library Manager</h2>
-          <p className="text-sm text-gray-500">Connected to Cloud Database</p>
+          <p className="text-sm text-gray-500">Connected to MongoDB Cloud</p>
         </div>
         <div className="flex items-center gap-3">
           <button 
@@ -525,7 +539,6 @@ function AdminPanel({
           <button 
             onClick={onExit} 
             className="p-2 border border-gray-300 rounded-lg text-black hover:bg-gray-100"
-            title="Return to Presentation"
           >
             <X size={20} />
           </button>
@@ -538,6 +551,36 @@ function AdminPanel({
           <h3 className="text-xl font-bold text-black mb-4">
             {editingSong ? 'Edit Song' : 'Add New Song'}
           </h3>
+
+          {/* Ultimate Guitar Import Box */}
+          <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Link size={14} className="text-gray-500" /> Auto-Import via Ultimate Guitar
+            </label>
+            <div className="flex gap-2">
+              <input 
+                type="url" 
+                value={ugUrl}
+                onChange={(e) => setUgUrl(e.target.value)}
+                placeholder="https://tabs.ultimate-guitar.com/tab/..."
+                className="flex-1 border border-gray-300 p-2 text-xs rounded-lg bg-white text-black"
+              />
+              <button 
+                onClick={handleImportUG}
+                disabled={isImporting || !ugUrl}
+                className="bg-black text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center gap-1"
+              >
+                {isImporting ? <RefreshCw className="animate-spin" size={14} /> : <DownloadCloud size={14} />}
+                Import
+              </button>
+            </div>
+            {importStatus && (
+              <p className={`text-xs mt-2 font-medium ${importStatus.startsWith('Error') ? 'text-red-600' : 'text-emerald-600'}`}>
+                {importStatus}
+              </p>
+            )}
+          </div>
+
           <form onSubmit={handleSubmitSong} className="space-y-4">
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-1.5">Song Title</label>
@@ -611,7 +654,7 @@ function AdminPanel({
 
           <div className="overflow-y-auto divide-y divide-gray-100 flex-1 pr-1">
             {songs.length === 0 ? (
-              <p className="text-gray-500 text-sm italic py-8 text-center">No songs stored yet.</p>
+              <p className="text-gray-500 text-sm italic py-8 text-center">No songs stored in MongoDB yet.</p>
             ) : (
               songs.map(song => (
                 <div key={song.id} className="py-3 flex justify-between items-center hover:bg-gray-50 px-2 rounded-lg transition">
