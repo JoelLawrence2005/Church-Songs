@@ -319,9 +319,34 @@ function SongViewer({ song, onExit }) {
   const renderSlideContent = (content) => {
     const lines = content.split('\n');
     return lines.map((line, lineIdx) => {
+      // Check if line is a section header (e.g., "Refrain", "Verse 1", "Chorus")
+      const isHeader = /^(refrain|verse|chorus|bridge|tag|intro|outro|ending)/i.test(line.trim());
+
+      if (isHeader) {
+        return (
+          <div 
+            key={lineIdx} 
+            className="font-bold text-red-600 tracking-wide text-center"
+            style={{ 
+              color: '#dc2626', 
+              WebkitTextFillColor: '#dc2626',
+              fontSize: '0.7em',
+              marginBottom: '0.5rem',
+              marginTop: lineIdx > 0 ? '1rem' : '0'
+            }}
+          >
+            {line.trim()}
+          </div>
+        );
+      }
+
       const parts = line.split(/(\[[^\]]+\])/g);
       return (
-        <div key={lineIdx} className="flex flex-wrap items-end justify-center min-h-[1.6em]" style={{ marginBottom: `${(lineHeight - 1) * 1.5}rem` }}>
+        <div 
+          key={lineIdx} 
+          className="flex flex-wrap items-end justify-center leading-normal" 
+          style={{ marginBottom: `${(lineHeight - 0.9) * 1.8}rem` }}
+        >
           {parts.map((part, pIdx) => {
             if (part.startsWith('[') && part.endsWith(']')) {
               const chord = part.slice(1, -1);
@@ -329,8 +354,14 @@ function SongViewer({ song, onExit }) {
               return showChords ? (
                 <span 
                   key={pIdx} 
-                  className="font-bold relative inline-block px-1" 
-                  style={{ color: '#dc2626', WebkitTextFillColor: '#dc2626', top: '-0.7em' }}
+                  className="font-bold relative inline-block px-0.5 tracking-tight select-none" 
+                  style={{ 
+                    color: '#dc2626', 
+                    WebkitTextFillColor: '#dc2626', 
+                    fontSize: '0.65em',
+                    top: '-0.25em',
+                    lineHeight: '1'
+                  }}
                 >
                   {transposed}
                 </span>
@@ -340,7 +371,11 @@ function SongViewer({ song, onExit }) {
               <span 
                 key={pIdx} 
                 className="whitespace-pre font-bold" 
-                style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+                style={{ 
+                  color: '#000000', 
+                  WebkitTextFillColor: '#000000',
+                  lineHeight: '1.2'
+                }}
               >
                 {part}
               </span>
