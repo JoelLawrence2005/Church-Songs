@@ -13,9 +13,10 @@ import {
   Trash2, 
   Edit, 
   Save, 
-  Music, 
   LogOut,
-  RefreshCw
+  RefreshCw,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 const transposeChord = (chord, semitones) => {
@@ -47,7 +48,6 @@ export default function App() {
   const [loginError, setLoginError] = useState('');
   const [editingSong, setEditingSong] = useState(null);
 
-  // Fetch songs from MongoDB via API Route
   const fetchSongs = async () => {
     setLoading(true);
     try {
@@ -74,14 +74,13 @@ export default function App() {
       setLoginError('');
       setLoginForm({ username: '', password: '' });
     } else {
-      setLoginError('Invalid credentials');
+      setLoginError('Invalid username or password');
     }
   };
 
   const handleSaveSong = async (songData) => {
     try {
       if (songData.id) {
-        // Update existing song
         const res = await fetch('/api/songs', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -92,7 +91,6 @@ export default function App() {
           setSongs(songs.map(s => s.id === updated.id ? updated : s));
         }
       } else {
-        // Create new song
         const res = await fetch('/api/songs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -124,42 +122,42 @@ export default function App() {
   const languages = ['English', 'Sinhala', 'Tamil'];
 
   const filteredSongs = songs.filter(s => 
-    s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.slides.some(slide => slide.toLowerCase().includes(searchQuery.toLowerCase()))
+    (s.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.slides || []).some(slide => slide.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
-    <div className="min-h-screen bg-white text-black" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>
+    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
+      {/* LIST VIEW (MAIN PAGE) */}
       {currentView === 'list' && (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Header */}
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          {/* Top Bar */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold tracking-tight">ICC Slides</h1>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setCurrentView('admin')}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
-                title="Admin Panel"
-              >
-                <Lock size={20} />
-              </button>
-            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-black">ICC Slides</h1>
+            <button 
+              onClick={() => setCurrentView('admin')}
+              className="p-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-black transition flex items-center gap-1.5 text-sm font-semibold"
+              title="Admin Portal"
+            >
+              <Lock size={18} className="text-black" />
+              <span>Admin</span>
+            </button>
           </div>
 
           {/* Search Bar */}
           <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
             <input 
               type="text" 
-              placeholder="Search songs..." 
+              placeholder="Search by song title or lyric..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition"
             />
           </div>
 
-          {/* Language Navigation */}
-          <div className="flex gap-2 mb-8 border-b border-gray-100 pb-3">
+          {/* Language Filter Tabs */}
+          <div className="flex gap-2 mb-8 pb-3 border-b border-gray-200 overflow-x-auto">
             {languages.map(lang => (
               <button
                 key={lang}
@@ -168,20 +166,21 @@ export default function App() {
                   const el = document.getElementById(`section-${lang}`);
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className={`px-3 py-1 text-sm font-medium rounded-full transition ${
-                  selectedLanguage === lang ? 'bg-black text-white' : 'text-black hover:bg-gray-100'
+                className={`px-4 py-2 text-sm font-bold rounded-lg transition ${
+                  selectedLanguage === lang 
+                    ? 'bg-black text-white' 
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                 }`}
-                style={selectedLanguage === lang ? { color: '#ffffff', WebkitTextFillColor: '#ffffff' } : {}}
               >
                 {lang}
               </button>
             ))}
           </div>
 
-          {/* Song Lists by Language */}
+          {/* Song Category Lists */}
           {loading ? (
-            <div className="flex justify-center items-center py-20 text-gray-500">
-              <RefreshCw className="animate-spin mr-2" size={20} /> Loading songs...
+            <div className="flex justify-center items-center py-24 text-gray-600 font-medium">
+              <RefreshCw className="animate-spin mr-2" size={22} /> Loading song library...
             </div>
           ) : (
             <div className="space-y-6">
@@ -190,27 +189,31 @@ export default function App() {
                 const isExpanded = expandedSections[lang];
 
                 return (
-                  <div key={lang} id={`section-${lang}`} className="border-b border-gray-100 pb-4">
+                  <div key={lang} id={`section-${lang}`} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
                     <button 
                       onClick={() => setExpandedSections(prev => ({ ...prev, [lang]: !prev[lang] }))}
-                      className="flex justify-between items-center w-full py-2 text-left font-bold text-lg"
+                      className="flex justify-between items-center w-full px-5 py-4 bg-gray-50 hover:bg-gray-100 transition text-left"
                     >
-                      <span>{lang}</span>
-                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      <span className="text-xl font-bold text-black">{lang}</span>
+                      <span className="text-sm font-semibold text-gray-500 flex items-center gap-2">
+                        {langSongs.length} {langSongs.length === 1 ? 'song' : 'songs'}
+                        {isExpanded ? <ChevronUp size={20} className="text-black" /> : <ChevronDown size={20} className="text-black" />}
+                      </span>
                     </button>
 
                     {isExpanded && (
-                      <div className="mt-2 pl-2 space-y-1">
+                      <div className="divide-y divide-gray-100">
                         {langSongs.length === 0 ? (
-                          <div className="text-gray-400 py-2 text-sm">No songs available</div>
+                          <div className="p-5 text-gray-500 text-sm italic">No songs listed in {lang} yet.</div>
                         ) : (
                           langSongs.map(song => (
                             <div 
                               key={song.id}
                               onClick={() => { setSelectedSong(song); setCurrentView('view'); }}
-                              className="py-2 px-2 hover:bg-gray-50 rounded cursor-pointer transition text-black font-medium"
+                              className="px-5 py-3.5 hover:bg-gray-50 cursor-pointer transition text-black font-semibold text-base flex justify-between items-center"
                             >
-                              {song.title}
+                              <span>{song.title}</span>
+                              <ChevronRight size={18} className="text-gray-400" />
                             </div>
                           ))
                         )}
@@ -224,6 +227,7 @@ export default function App() {
         </div>
       )}
 
+      {/* SONG VIEWER */}
       {currentView === 'view' && selectedSong && (
         <SongViewer 
           song={selectedSong} 
@@ -231,6 +235,7 @@ export default function App() {
         />
       )}
 
+      {/* ADMIN PANEL */}
       {currentView === 'admin' && (
         <AdminPanel 
           isLoggedIn={isAdminLoggedIn}
@@ -256,17 +261,16 @@ function SongViewer({ song, onExit }) {
   const [showChords, setShowChords] = useState(true);
   const [capo, setCapo] = useState(0);
   const [fontScale, setFontScale] = useState(1);
-  const [lineHeight, setLineHeight] = useState(1.4);
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
   const viewerRef = useRef(null);
 
-  const slides = [{ type: 'title', content: song.title }, ...song.slides.map(s => ({ type: 'lyrics', content: s }))];
+  const slides = [{ type: 'title', content: song.title }, ...(song.slides || []).map(s => ({ type: 'lyrics', content: s }))];
 
   const handleMouseMove = () => {
     setShowControls(true);
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-    controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 2500);
+    controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 3000);
   };
 
   const nextSlide = () => {
@@ -279,8 +283,8 @@ function SongViewer({ song, onExit }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
-      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
       if (e.key === 'Escape') onExit();
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -292,7 +296,7 @@ function SongViewer({ song, onExit }) {
     return lines.map((line, lineIdx) => {
       const parts = line.split(/(\[[^\]]+\])/g);
       return (
-        <div key={lineIdx} className="flex flex-wrap items-end justify-center min-h-[1.5em]">
+        <div key={lineIdx} className="flex flex-wrap items-end justify-center my-2 min-h-[1.6em]">
           {parts.map((part, pIdx) => {
             if (part.startsWith('[') && part.endsWith(']')) {
               const chord = part.slice(1, -1);
@@ -300,15 +304,15 @@ function SongViewer({ song, onExit }) {
               return showChords ? (
                 <span 
                   key={pIdx} 
-                  className="font-bold relative text-red-600 block" 
-                  style={{ color: '#dc2626', WebkitTextFillColor: '#dc2626', top: '-0.7em', margin: '0 2px' }}
+                  className="font-bold relative text-red-600 inline-block px-0.5" 
+                  style={{ color: '#dc2626', top: '-0.7em' }}
                 >
                   {transposed}
                 </span>
               ) : null;
             }
             return (
-              <span key={pIdx} className="whitespace-pre text-black font-semibold" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>
+              <span key={pIdx} className="whitespace-pre text-black font-bold">
                 {part}
               </span>
             );
@@ -324,80 +328,92 @@ function SongViewer({ song, onExit }) {
       onMouseMove={handleMouseMove}
       className="fixed inset-0 bg-white z-50 flex flex-col justify-between select-none overflow-hidden"
     >
-      {/* Top Bar Controls */}
-      <div className={`p-4 flex justify-between items-center transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
-        <button onClick={onExit} className="p-2 hover:bg-gray-100 rounded-full">
-          <X size={24} />
+      {/* Top Floating Control Bar */}
+      <div className={`p-4 flex justify-between items-center transition-opacity duration-300 bg-gradient-to-b from-white/90 to-transparent ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <button 
+          onClick={onExit} 
+          className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-black transition shadow-sm pointer-events-auto"
+          title="Exit to song list (Esc)"
+        >
+          <X size={24} className="text-black" />
         </button>
-        <div className="flex items-center gap-4 bg-gray-100 px-4 py-2 rounded-full text-sm">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={showChords} onChange={(e) => setShowChords(e.target.checked)} />
-            Chords
-          </label>
-          <div className="flex items-center gap-1">
-            <span>Capo: {capo}</span>
-            <button onClick={() => setCapo(c => c - 1)} className="px-2 bg-white rounded shadow-sm">-</button>
-            <button onClick={() => setCapo(c => c + 1)} className="px-2 bg-white rounded shadow-sm">+</button>
+
+        <div className="flex items-center gap-3 bg-white border border-gray-300 px-4 py-2 rounded-full shadow-md pointer-events-auto">
+          {/* Chords Toggle */}
+          <button 
+            onClick={() => setShowChords(!showChords)}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold transition ${
+              showChords ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            {showChords ? <Eye size={16} /> : <EyeOff size={16} />}
+            <span>Chords</span>
+          </button>
+
+          <div className="h-4 w-px bg-gray-300" />
+
+          {/* Capo */}
+          <div className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
+            <span>Capo {capo}</span>
+            <button onClick={() => setCapo(c => c - 1)} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">-</button>
+            <button onClick={() => setCapo(c => c + 1)} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">+</button>
           </div>
-          <div className="flex items-center gap-1">
-            <span>A: {Math.round(fontScale * 100)}%</span>
-            <button onClick={() => setFontScale(s => Math.max(0.6, s - 0.1))} className="px-2 bg-white rounded shadow-sm">-</button>
-            <button onClick={() => setFontScale(s => Math.min(2.5, s + 0.1))} className="px-2 bg-white rounded shadow-sm">+</button>
+
+          <div className="h-4 w-px bg-gray-300" />
+
+          {/* Font Scale */}
+          <div className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
+            <span>A</span>
+            <button onClick={() => setFontScale(s => Math.max(0.6, Number((s - 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">-</button>
+            <span className="text-xs text-gray-600 min-w-[36px] text-center">{Math.round(fontScale * 100)}%</span>
+            <button onClick={() => setFontScale(s => Math.min(2.5, Number((s + 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">+</button>
           </div>
         </div>
       </div>
 
-      {/* Main Slide Screen */}
-      <div className="flex-1 flex items-center justify-center px-12 text-center">
+      {/* Slide Display Canvas */}
+      <div className="flex-1 flex items-center justify-center px-12 text-center overflow-auto">
         {slides[currentSlideIndex].type === 'title' ? (
           <h1 
-            className="font-extrabold text-black"
-            style={{ 
-              fontSize: `calc(clamp(2.5rem, 6vw, 6rem) * ${fontScale})`,
-              color: '#000000', 
-              WebkitTextFillColor: '#000000' 
-            }}
+            className="font-extrabold text-black tracking-tight"
+            style={{ fontSize: `calc(clamp(2.5rem, 6vw, 5.5rem) * ${fontScale})` }}
           >
             {slides[currentSlideIndex].content}
           </h1>
         ) : (
           <div 
-            className="w-full"
-            style={{ 
-              fontSize: `calc(clamp(1.8rem, 4vw, 4rem) * ${fontScale})`,
-              lineHeight: lineHeight,
-              color: '#000000', 
-              WebkitTextFillColor: '#000000' 
-            }}
+            className="w-full text-black"
+            style={{ fontSize: `calc(clamp(1.8rem, 4.2vw, 3.8rem) * ${fontScale})` }}
           >
             {renderSlideContent(slides[currentSlideIndex].content)}
           </div>
         )}
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Floating Buttons */}
       <button 
         onClick={prevSlide} 
         disabled={currentSlideIndex === 0}
-        className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-gray-100/70 hover:bg-gray-200 rounded-full transition ${
+        className={`absolute left-5 top-1/2 -translate-y-1/2 p-4 bg-white border border-gray-300 rounded-full shadow-lg text-black transition hover:bg-gray-100 ${
           showControls && currentSlideIndex > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <ChevronLeft size={32} />
+        <ChevronLeft size={36} className="text-black" />
       </button>
+
       <button 
         onClick={nextSlide} 
         disabled={currentSlideIndex === slides.length - 1}
-        className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-gray-100/70 hover:bg-gray-200 rounded-full transition ${
+        className={`absolute right-5 top-1/2 -translate-y-1/2 p-4 bg-white border border-gray-300 rounded-full shadow-lg text-black transition hover:bg-gray-100 ${
           showControls && currentSlideIndex < slides.length - 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <ChevronRight size={32} />
+        <ChevronRight size={36} className="text-black" />
       </button>
 
-      {/* Slide Indicators */}
-      <div className="p-4 text-center text-xs text-gray-400">
-        Slide {currentSlideIndex + 1} of {slides.length}
+      {/* Footer Indicator */}
+      <div className="p-4 text-center text-sm font-semibold text-gray-500">
+        {currentSlideIndex + 1} / {slides.length}
       </div>
     </div>
   );
@@ -423,9 +439,9 @@ function AdminPanel({
 
   useEffect(() => {
     if (editingSong) {
-      setTitle(editingSong.title);
-      setLanguage(editingSong.language);
-      setSlidesText(editingSong.slides.join('\n\n---\n\n'));
+      setTitle(editingSong.title || '');
+      setLanguage(editingSong.language || 'English');
+      setSlidesText((editingSong.slides || []).join('\n\n---\n\n'));
     } else {
       setTitle('');
       setLanguage('English');
@@ -444,37 +460,45 @@ function AdminPanel({
     });
   };
 
+  // Login Modal / Screen
   if (!isLoggedIn) {
     return (
       <div className="max-w-md mx-auto px-4 py-20">
-        <div className="border border-gray-200 p-6 rounded-xl shadow-sm">
+        <div className="border border-gray-300 bg-white p-8 rounded-2xl shadow-lg">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Admin Login</h2>
-            <button onClick={onExit}><X size={20} /></button>
+            <h2 className="text-2xl font-bold text-black">Admin Access</h2>
+            <button onClick={onExit} className="p-1 hover:bg-gray-100 rounded-full text-black">
+              <X size={22} />
+            </button>
           </div>
           <form onSubmit={onLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Username</label>
+              <label className="block text-sm font-bold text-gray-800 mb-1.5">Username</label>
               <input 
                 type="text" 
                 value={loginForm.username} 
                 onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
-                className="w-full border p-2 rounded-lg" 
+                className="w-full border border-gray-300 p-3 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none" 
+                placeholder="Enter username"
                 required 
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Password</label>
+              <label className="block text-sm font-bold text-gray-800 mb-1.5">Password</label>
               <input 
                 type="password" 
                 value={loginForm.password} 
                 onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                className="w-full border p-2 rounded-lg" 
+                className="w-full border border-gray-300 p-3 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none" 
+                placeholder="Enter password"
                 required 
               />
             </div>
-            {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
-            <button type="submit" className="w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition">
+            {loginError && <p className="text-red-600 font-semibold text-sm">{loginError}</p>}
+            <button 
+              type="submit" 
+              className="w-full bg-black hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition shadow-sm mt-2"
+            >
               Sign In
             </button>
           </form>
@@ -483,66 +507,94 @@ function AdminPanel({
     );
   }
 
+  // Logged-in Dashboard
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8 border-b pb-4">
-        <h2 className="text-2xl font-bold">Admin Dashboard</h2>
-        <div className="flex gap-2">
-          <button onClick={onLogout} className="px-3 py-2 border rounded-lg flex items-center gap-1 hover:bg-gray-50">
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
+        <div>
+          <h2 className="text-2xl font-extrabold text-black">Song Library Manager</h2>
+          <p className="text-sm text-gray-500">Connected to Cloud Database</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onLogout} 
+            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold text-black hover:bg-gray-100 flex items-center gap-1.5"
+          >
             <LogOut size={16} /> Logout
           </button>
-          <button onClick={onExit} className="p-2 border rounded-lg hover:bg-gray-50">
+          <button 
+            onClick={onExit} 
+            className="p-2 border border-gray-300 rounded-lg text-black hover:bg-gray-100"
+            title="Return to Presentation"
+          >
             <X size={20} />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Editor Form */}
-        <div className="border p-6 rounded-xl bg-gray-50">
-          <h3 className="text-lg font-bold mb-4">{editingSong ? 'Edit Song' : 'Add New Song'}</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Form Container */}
+        <div className="lg:col-span-6 border border-gray-300 p-6 rounded-2xl bg-white shadow-sm">
+          <h3 className="text-xl font-bold text-black mb-4">
+            {editingSong ? 'Edit Song' : 'Add New Song'}
+          </h3>
           <form onSubmit={handleSubmitSong} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Song Title</label>
+              <label className="block text-sm font-bold text-gray-800 mb-1.5">Song Title</label>
               <input 
                 type="text" 
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)} 
-                className="w-full border p-2 rounded-lg bg-white" 
+                className="w-full border border-gray-300 p-2.5 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none" 
+                placeholder="e.g. Amazing Grace"
                 required 
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium mb-1">Language</label>
+              <label className="block text-sm font-bold text-gray-800 mb-1.5">Language</label>
               <select 
                 value={language} 
                 onChange={(e) => setLanguage(e.target.value)} 
-                className="w-full border p-2 rounded-lg bg-white"
+                className="w-full border border-gray-300 p-2.5 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none"
               >
                 <option value="English">English</option>
                 <option value="Sinhala">Sinhala</option>
                 <option value="Tamil">Tamil</option>
               </select>
             </div>
+
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Lyrics & Chords (Separate slides with <code className="bg-gray-200 px-1 rounded">---</code>)
+              <label className="block text-sm font-bold text-gray-800 mb-1">
+                Lyrics & Chords
               </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Use brackets for chords like <span className="font-mono text-red-600">[G]</span>. Separate slides using <span className="font-mono bg-gray-100 px-1 py-0.5 rounded text-black border font-bold">---</span>
+              </p>
               <textarea 
                 rows="10" 
                 value={slidesText} 
                 onChange={(e) => setSlidesText(e.target.value)} 
                 placeholder="[G]Amazing grace how [C]sweet the sound&#10;&#10;---&#10;&#10;[G]That saved a [D]wretch like me"
-                className="w-full border p-2 rounded-lg bg-white font-mono text-sm" 
+                className="w-full border border-gray-300 p-3 rounded-lg text-black bg-white font-mono text-sm focus:ring-2 focus:ring-black focus:outline-none" 
                 required 
               />
             </div>
-            <div className="flex gap-2">
-              <button type="submit" className="flex-1 bg-black text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2">
-                <Save size={16} /> Save to Cloud
+
+            <div className="flex gap-3 pt-2">
+              <button 
+                type="submit" 
+                className="flex-1 bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition"
+              >
+                <Save size={18} />
+                <span>{editingSong ? 'Update Song' : 'Save to Cloud'}</span>
               </button>
               {editingSong && (
-                <button type="button" onClick={() => setEditingSong(null)} className="px-4 py-2 border rounded-lg">
+                <button 
+                  type="button" 
+                  onClick={() => setEditingSong(null)} 
+                  className="px-5 py-3 border border-gray-300 text-black font-bold rounded-lg hover:bg-gray-100"
+                >
                   Cancel
                 </button>
               )}
@@ -550,25 +602,43 @@ function AdminPanel({
           </form>
         </div>
 
-        {/* Existing Songs Management */}
-        <div className="space-y-2 max-h-[600px] overflow-y-auto">
-          <h3 className="text-lg font-bold mb-4">Manage Songs ({songs.length})</h3>
-          {songs.map(song => (
-            <div key={song.id} className="flex justify-between items-center p-3 border rounded-lg bg-white hover:border-black transition">
-              <div>
-                <p className="font-semibold">{song.title}</p>
-                <span className="text-xs text-gray-500">{song.language} • {song.slides.length} slides</span>
-              </div>
-              <div className="flex gap-1">
-                <button onClick={() => setEditingSong(song)} className="p-2 hover:bg-gray-100 rounded text-blue-600">
-                  <Edit size={16} />
-                </button>
-                <button onClick={() => handleDeleteSong(song.id)} className="p-2 hover:bg-gray-100 rounded text-red-600">
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
+        {/* Existing Songs List */}
+        <div className="lg:col-span-6 border border-gray-300 p-6 rounded-2xl bg-white shadow-sm flex flex-col h-[650px]">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold text-black">Songs in Database</h3>
+            <span className="text-xs font-bold bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">{songs.length} Total</span>
+          </div>
+
+          <div className="overflow-y-auto divide-y divide-gray-100 flex-1 pr-1">
+            {songs.length === 0 ? (
+              <p className="text-gray-500 text-sm italic py-8 text-center">No songs stored yet.</p>
+            ) : (
+              songs.map(song => (
+                <div key={song.id} className="py-3 flex justify-between items-center hover:bg-gray-50 px-2 rounded-lg transition">
+                  <div>
+                    <h4 className="font-bold text-black text-base">{song.title}</h4>
+                    <p className="text-xs text-gray-500 font-medium">{song.language} • {(song.slides || []).length} slides</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => setEditingSong(song)} 
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                      title="Edit"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteSong(song.id)} 
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                      title="Delete"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
