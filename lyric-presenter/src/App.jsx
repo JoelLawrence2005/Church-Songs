@@ -743,11 +743,7 @@ function AdminPanel({
                     >
                       <Edit size={18} />
                     </button>
-                    <button 
-                      onClick={() => handleDeleteSong(song.id)} 
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                      title="Delete"
-                    >
+                    <button onClick={() => onDelete(song.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
                       <Trash2 size={18} />
                     </button>
                   </div>
