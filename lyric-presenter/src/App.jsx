@@ -10,7 +10,7 @@ import {
   Trash2, 
   Edit, 
   Save, 
-  LogOut,
+  LogOut, 
   RefreshCw,
   Eye,
   EyeOff,
@@ -35,7 +35,7 @@ const transposeChord = (chord, semitones) => {
 export default function App() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('list');
+  const [currentView, setCurrentView] = useState('list'); // 'list', 'view', 'admin'
   const [selectedSong, setSelectedSong] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
@@ -125,21 +125,29 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
-      {/* MAIN VIEW */}
+    <div className="min-h-screen bg-white" style={{ backgroundColor: '#ffffff', color: '#000000' }}>
+      {/* LIST VIEW (MAIN PAGE) */}
       {currentView === 'list' && (
         <div className="max-w-3xl mx-auto px-4 py-8">
+          {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-extrabold tracking-tight text-black">ICC Slides</h1>
+            <h1 
+              className="text-3xl font-extrabold tracking-tight" 
+              style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+            >
+              ICC Slides
+            </h1>
             <button 
               onClick={() => setCurrentView('admin')}
-              className="p-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-black transition flex items-center gap-1.5 text-sm font-semibold"
+              className="p-2.5 rounded-full border border-gray-300 hover:bg-gray-100 transition flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
             >
-              <Lock size={18} className="text-black" />
+              <Lock size={18} style={{ color: '#000000' }} />
               <span>Admin</span>
             </button>
           </div>
 
+          {/* Search Bar */}
           <div className="relative mb-6">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
             <input 
@@ -147,10 +155,12 @@ export default function App() {
               placeholder="Search by song title or lyric..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition"
+              className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition"
+              style={{ color: '#000000' }}
             />
           </div>
 
+          {/* Language Tabs */}
           <div className="flex gap-2 mb-8 pb-3 border-b border-gray-200 overflow-x-auto">
             {languages.map(lang => (
               <button
@@ -163,14 +173,16 @@ export default function App() {
                 className={`px-4 py-2 text-sm font-bold rounded-lg transition ${
                   selectedLanguage === lang 
                     ? 'bg-black text-white' 
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                    : 'bg-gray-100 text-black hover:bg-gray-200'
                 }`}
+                style={selectedLanguage === lang ? { color: '#ffffff', WebkitTextFillColor: '#ffffff' } : { color: '#000000', WebkitTextFillColor: '#000000' }}
               >
                 {lang}
               </button>
             ))}
           </div>
 
+          {/* Categories and Song Lists */}
           {loading ? (
             <div className="flex justify-center items-center py-24 text-gray-600 font-medium">
               <RefreshCw className="animate-spin mr-2" size={22} /> Loading song library...
@@ -187,10 +199,15 @@ export default function App() {
                       onClick={() => setExpandedSections(prev => ({ ...prev, [lang]: !prev[lang] }))}
                       className="flex justify-between items-center w-full px-5 py-4 bg-gray-50 hover:bg-gray-100 transition text-left"
                     >
-                      <span className="text-xl font-bold text-black">{lang}</span>
+                      <span 
+                        className="text-xl font-bold" 
+                        style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+                      >
+                        {lang}
+                      </span>
                       <span className="text-sm font-semibold text-gray-500 flex items-center gap-2">
                         {langSongs.length} {langSongs.length === 1 ? 'song' : 'songs'}
-                        {isExpanded ? <ChevronUp size={20} className="text-black" /> : <ChevronDown size={20} className="text-black" />}
+                        {isExpanded ? <ChevronUp size={20} style={{ color: '#000000' }} /> : <ChevronDown size={20} style={{ color: '#000000' }} />}
                       </span>
                     </button>
 
@@ -203,9 +220,10 @@ export default function App() {
                             <div 
                               key={song.id}
                               onClick={() => { setSelectedSong(song); setCurrentView('view'); }}
-                              className="px-5 py-3.5 hover:bg-gray-50 cursor-pointer transition text-black font-semibold text-base flex justify-between items-center"
+                              className="px-5 py-3.5 hover:bg-gray-50 cursor-pointer transition font-semibold text-base flex justify-between items-center"
+                              style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
                             >
-                              <span>{song.title}</span>
+                              <span style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>{song.title}</span>
                               <ChevronRight size={18} className="text-gray-400" />
                             </div>
                           ))
@@ -254,6 +272,7 @@ function SongViewer({ song, onExit }) {
   const [showChords, setShowChords] = useState(true);
   const [capo, setCapo] = useState(0);
   const [fontScale, setFontScale] = useState(1);
+  const [lineHeight, setLineHeight] = useState(1.4);
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
 
@@ -288,7 +307,7 @@ function SongViewer({ song, onExit }) {
     return lines.map((line, lineIdx) => {
       const parts = line.split(/(\[[^\]]+\])/g);
       return (
-        <div key={lineIdx} className="flex flex-wrap items-end justify-center my-2 min-h-[1.6em]">
+        <div key={lineIdx} className="flex flex-wrap items-end justify-center min-h-[1.6em]" style={{ marginBottom: `${(lineHeight - 1) * 1.5}rem` }}>
           {parts.map((part, pIdx) => {
             if (part.startsWith('[') && part.endsWith(']')) {
               const chord = part.slice(1, -1);
@@ -296,15 +315,19 @@ function SongViewer({ song, onExit }) {
               return showChords ? (
                 <span 
                   key={pIdx} 
-                  className="font-bold relative text-red-600 inline-block px-0.5" 
-                  style={{ color: '#dc2626', top: '-0.7em' }}
+                  className="font-bold relative inline-block px-1" 
+                  style={{ color: '#dc2626', WebkitTextFillColor: '#dc2626', top: '-0.7em' }}
                 >
                   {transposed}
                 </span>
               ) : null;
             }
             return (
-              <span key={pIdx} className="whitespace-pre text-black font-bold">
+              <span 
+                key={pIdx} 
+                className="whitespace-pre font-bold" 
+                style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+              >
                 {part}
               </span>
             );
@@ -317,17 +340,21 @@ function SongViewer({ song, onExit }) {
   return (
     <div 
       onMouseMove={handleMouseMove}
-      className="fixed inset-0 bg-white z-50 flex flex-col justify-between select-none overflow-hidden"
+      className="fixed inset-0 z-50 flex flex-col justify-between select-none overflow-hidden"
+      style={{ backgroundColor: '#ffffff' }}
     >
+      {/* Top Floating Control Bar */}
       <div className={`p-4 flex justify-between items-center transition-opacity duration-300 bg-gradient-to-b from-white/90 to-transparent ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button 
           onClick={onExit} 
-          className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-black transition shadow-sm pointer-events-auto"
+          className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full transition shadow-sm pointer-events-auto"
+          title="Exit (Esc)"
         >
-          <X size={24} className="text-black" />
+          <X size={24} style={{ color: '#000000' }} />
         </button>
 
         <div className="flex items-center gap-3 bg-white border border-gray-300 px-4 py-2 rounded-full shadow-md pointer-events-auto">
+          {/* Chords Toggle */}
           <button 
             onClick={() => setShowChords(!showChords)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold transition ${
@@ -340,61 +367,84 @@ function SongViewer({ song, onExit }) {
 
           <div className="h-4 w-px bg-gray-300" />
 
-          <div className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
+          {/* Capo */}
+          <div className="flex items-center gap-1.5 text-sm font-bold" style={{ color: '#000000' }}>
             <span>Capo {capo}</span>
-            <button onClick={() => setCapo(c => c - 1)} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">-</button>
-            <button onClick={() => setCapo(c => c + 1)} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">+</button>
+            <button onClick={() => setCapo(c => c - 1)} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded font-bold flex items-center justify-center">-</button>
+            <button onClick={() => setCapo(c => c + 1)} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded font-bold flex items-center justify-center">+</button>
           </div>
 
           <div className="h-4 w-px bg-gray-300" />
 
-          <div className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
+          {/* Font Size (A) */}
+          <div className="flex items-center gap-1.5 text-sm font-bold" style={{ color: '#000000' }}>
             <span>A</span>
-            <button onClick={() => setFontScale(s => Math.max(0.6, Number((s - 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">-</button>
+            <button onClick={() => setFontScale(s => Math.max(0.6, Number((s - 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded font-bold flex items-center justify-center">-</button>
             <span className="text-xs text-gray-600 min-w-[36px] text-center">{Math.round(fontScale * 100)}%</span>
-            <button onClick={() => setFontScale(s => Math.min(2.5, Number((s + 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded text-black font-bold flex items-center justify-center">+</button>
+            <button onClick={() => setFontScale(s => Math.min(2.5, Number((s + 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded font-bold flex items-center justify-center">+</button>
+          </div>
+
+          <div className="h-4 w-px bg-gray-300" />
+
+          {/* Line Height Spacing */}
+          <div className="flex items-center gap-1.5 text-sm font-bold" style={{ color: '#000000' }}>
+            <span title="Line Height">↕</span>
+            <button onClick={() => setLineHeight(lh => Math.max(0.8, Number((lh - 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded font-bold flex items-center justify-center">-</button>
+            <span className="text-xs text-gray-600 min-w-[30px] text-center">{lineHeight.toFixed(1)}</span>
+            <button onClick={() => setLineHeight(lh => Math.min(2.5, Number((lh + 0.1).toFixed(1))))} className="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded font-bold flex items-center justify-center">+</button>
           </div>
         </div>
       </div>
 
+      {/* Slide Center Display */}
       <div className="flex-1 flex items-center justify-center px-12 text-center overflow-auto">
         {slides[currentSlideIndex].type === 'title' ? (
           <h1 
-            className="font-extrabold text-black tracking-tight"
-            style={{ fontSize: `calc(clamp(2.5rem, 6vw, 5.5rem) * ${fontScale})` }}
+            className="font-extrabold tracking-tight"
+            style={{ 
+              fontSize: `calc(clamp(2.5rem, 6vw, 5.5rem) * ${fontScale})`,
+              color: '#000000',
+              WebkitTextFillColor: '#000000'
+            }}
           >
             {slides[currentSlideIndex].content}
           </h1>
         ) : (
           <div 
-            className="w-full text-black"
-            style={{ fontSize: `calc(clamp(1.8rem, 4.2vw, 3.8rem) * ${fontScale})` }}
+            className="w-full"
+            style={{ 
+              fontSize: `calc(clamp(1.8rem, 4.2vw, 3.8rem) * ${fontScale})`,
+              lineHeight: lineHeight,
+              color: '#000000'
+            }}
           >
             {renderSlideContent(slides[currentSlideIndex].content)}
           </div>
         )}
       </div>
 
+      {/* Side Navigation Buttons */}
       <button 
         onClick={prevSlide} 
         disabled={currentSlideIndex === 0}
-        className={`absolute left-5 top-1/2 -translate-y-1/2 p-4 bg-white border border-gray-300 rounded-full shadow-lg text-black transition hover:bg-gray-100 ${
+        className={`absolute left-5 top-1/2 -translate-y-1/2 p-4 bg-white border border-gray-300 rounded-full shadow-lg transition hover:bg-gray-100 ${
           showControls && currentSlideIndex > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <ChevronLeft size={36} className="text-black" />
+        <ChevronLeft size={36} style={{ color: '#000000' }} />
       </button>
 
       <button 
         onClick={nextSlide} 
         disabled={currentSlideIndex === slides.length - 1}
-        className={`absolute right-5 top-1/2 -translate-y-1/2 p-4 bg-white border border-gray-300 rounded-full shadow-lg text-black transition hover:bg-gray-100 ${
+        className={`absolute right-5 top-1/2 -translate-y-1/2 p-4 bg-white border border-gray-300 rounded-full shadow-lg transition hover:bg-gray-100 ${
           showControls && currentSlideIndex < slides.length - 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <ChevronRight size={36} className="text-black" />
+        <ChevronRight size={36} style={{ color: '#000000' }} />
       </button>
 
+      {/* Footer Indicator */}
       <div className="p-4 text-center text-sm font-semibold text-gray-500">
         {currentSlideIndex + 1} / {slides.length}
       </div>
@@ -481,31 +531,33 @@ function AdminPanel({
       <div className="max-w-md mx-auto px-4 py-20">
         <div className="border border-gray-300 bg-white p-8 rounded-2xl shadow-lg">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-black">Admin Access</h2>
-            <button onClick={onExit} className="p-1 hover:bg-gray-100 rounded-full text-black">
-              <X size={22} />
+            <h2 className="text-2xl font-bold" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>Admin Access</h2>
+            <button onClick={onExit} className="p-1 hover:bg-gray-100 rounded-full">
+              <X size={22} style={{ color: '#000000' }} />
             </button>
           </div>
           <form onSubmit={onLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-1.5">Username</label>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>Username</label>
               <input 
                 type="text" 
                 value={loginForm.username} 
                 onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
-                className="w-full border border-gray-300 p-3 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none" 
+                className="w-full border border-gray-300 p-3 rounded-lg bg-white focus:ring-2 focus:ring-black focus:outline-none" 
                 placeholder="Enter username"
+                style={{ color: '#000000' }}
                 required 
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-1.5">Password</label>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>Password</label>
               <input 
                 type="password" 
                 value={loginForm.password} 
                 onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                className="w-full border border-gray-300 p-3 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none" 
+                className="w-full border border-gray-300 p-3 rounded-lg bg-white focus:ring-2 focus:ring-black focus:outline-none" 
                 placeholder="Enter password"
+                style={{ color: '#000000' }}
                 required 
               />
             </div>
@@ -513,6 +565,7 @@ function AdminPanel({
             <button 
               type="submit" 
               className="w-full bg-black hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition shadow-sm mt-2"
+              style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
             >
               Sign In
             </button>
@@ -526,35 +579,34 @@ function AdminPanel({
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
         <div>
-          <h2 className="text-2xl font-extrabold text-black">Song Library Manager</h2>
+          <h2 className="text-2xl font-extrabold" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>Song Library Manager</h2>
           <p className="text-sm text-gray-500">Connected to MongoDB Cloud</p>
         </div>
         <div className="flex items-center gap-3">
           <button 
             onClick={onLogout} 
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold text-black hover:bg-gray-100 flex items-center gap-1.5"
+            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold hover:bg-gray-100 flex items-center gap-1.5"
+            style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
           >
-            <LogOut size={16} /> Logout
+            <LogOut size={16} style={{ color: '#000000' }} /> Logout
           </button>
           <button 
             onClick={onExit} 
-            className="p-2 border border-gray-300 rounded-lg text-black hover:bg-gray-100"
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100"
           >
-            <X size={20} />
+            <X size={20} style={{ color: '#000000' }} />
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Form Container */}
         <div className="lg:col-span-6 border border-gray-300 p-6 rounded-2xl bg-white shadow-sm">
-          <h3 className="text-xl font-bold text-black mb-4">
+          <h3 className="text-xl font-bold mb-4" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>
             {editingSong ? 'Edit Song' : 'Add New Song'}
           </h3>
 
-          {/* Ultimate Guitar Import Box */}
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-xl">
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>
               <Link size={14} className="text-gray-500" /> Auto-Import via Ultimate Guitar
             </label>
             <div className="flex gap-2">
@@ -563,12 +615,14 @@ function AdminPanel({
                 value={ugUrl}
                 onChange={(e) => setUgUrl(e.target.value)}
                 placeholder="https://tabs.ultimate-guitar.com/tab/..."
-                className="flex-1 border border-gray-300 p-2 text-xs rounded-lg bg-white text-black"
+                className="flex-1 border border-gray-300 p-2 text-xs rounded-lg bg-white"
+                style={{ color: '#000000' }}
               />
               <button 
                 onClick={handleImportUG}
                 disabled={isImporting || !ugUrl}
                 className="bg-black text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center gap-1"
+                style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
               >
                 {isImporting ? <RefreshCw className="animate-spin" size={14} /> : <DownloadCloud size={14} />}
                 Import
@@ -583,23 +637,25 @@ function AdminPanel({
 
           <form onSubmit={handleSubmitSong} className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-1.5">Song Title</label>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>Song Title</label>
               <input 
                 type="text" 
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)} 
-                className="w-full border border-gray-300 p-2.5 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none" 
+                className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-black focus:outline-none" 
                 placeholder="e.g. Amazing Grace"
+                style={{ color: '#000000' }}
                 required 
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-1.5">Language</label>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>Language</label>
               <select 
                 value={language} 
                 onChange={(e) => setLanguage(e.target.value)} 
-                className="w-full border border-gray-300 p-2.5 rounded-lg text-black bg-white focus:ring-2 focus:ring-black focus:outline-none"
+                className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-black focus:outline-none"
+                style={{ color: '#000000' }}
               >
                 <option value="English">English</option>
                 <option value="Sinhala">Sinhala</option>
@@ -608,18 +664,19 @@ function AdminPanel({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-1">
+              <label className="block text-sm font-bold mb-1" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>
                 Lyrics & Chords
               </label>
               <p className="text-xs text-gray-500 mb-2">
-                Use brackets for chords like <span className="font-mono text-red-600">[G]</span>. Separate slides using <span className="font-mono bg-gray-100 px-1 py-0.5 rounded text-black border font-bold">---</span>
+                Use brackets for chords like <span className="font-mono text-red-600 font-bold">[G]</span>. Separate slides using <span className="font-mono bg-gray-100 px-1 py-0.5 rounded border font-bold" style={{ color: '#000000' }}>---</span>
               </p>
               <textarea 
                 rows="10" 
                 value={slidesText} 
                 onChange={(e) => setSlidesText(e.target.value)} 
                 placeholder="[G]Amazing grace how [C]sweet the sound&#10;&#10;---&#10;&#10;[G]That saved a [D]wretch like me"
-                className="w-full border border-gray-300 p-3 rounded-lg text-black bg-white font-mono text-sm focus:ring-2 focus:ring-black focus:outline-none" 
+                className="w-full border border-gray-300 p-3 rounded-lg bg-white font-mono text-sm focus:ring-2 focus:ring-black focus:outline-none" 
+                style={{ color: '#000000' }}
                 required 
               />
             </div>
@@ -628,6 +685,7 @@ function AdminPanel({
               <button 
                 type="submit" 
                 className="flex-1 bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition"
+                style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
               >
                 <Save size={18} />
                 <span>{editingSong ? 'Update Song' : 'Save to Cloud'}</span>
@@ -636,7 +694,8 @@ function AdminPanel({
                 <button 
                   type="button" 
                   onClick={() => setEditingSong(null)} 
-                  className="px-5 py-3 border border-gray-300 text-black font-bold rounded-lg hover:bg-gray-100"
+                  className="px-5 py-3 border border-gray-300 font-bold rounded-lg hover:bg-gray-100"
+                  style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
                 >
                   Cancel
                 </button>
@@ -648,7 +707,7 @@ function AdminPanel({
         {/* Existing Songs List */}
         <div className="lg:col-span-6 border border-gray-300 p-6 rounded-2xl bg-white shadow-sm flex flex-col h-[650px]">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-black">Songs in Database</h3>
+            <h3 className="text-xl font-bold" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>Songs in Database</h3>
             <span className="text-xs font-bold bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">{songs.length} Total</span>
           </div>
 
@@ -659,7 +718,7 @@ function AdminPanel({
               songs.map(song => (
                 <div key={song.id} className="py-3 flex justify-between items-center hover:bg-gray-50 px-2 rounded-lg transition">
                   <div>
-                    <h4 className="font-bold text-black text-base">{song.title}</h4>
+                    <h4 className="font-bold text-base" style={{ color: '#000000', WebkitTextFillColor: '#000000' }}>{song.title}</h4>
                     <p className="text-xs text-gray-500 font-medium">{song.language} • {(song.slides || []).length} slides</p>
                   </div>
                   <div className="flex items-center gap-1">
